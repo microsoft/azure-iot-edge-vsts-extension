@@ -1,0 +1,122 @@
+{
+  "id": "80F3F6A0-82A6-4A22-BA7A-E5B8C541B9B8",
+  "name": "zhiqing-edge-test-name",
+  "friendlyName": "Zhiqing EDGE test",
+  "description": "Zhiqing EDGE test - description",
+  "helpMarkDown": "",
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "author": "Microsoft Corporation",
+  "version": {
+    "Major": 0,
+    "Minor": 1,
+    "Patch": 0
+  },
+  "instanceNameFormat": "Edge task",
+  "groups": [
+    {
+      "name": "advanced",
+      "displayName": "Advanced",
+      "isExpanded": false
+    }
+  ],
+  "inputs": [
+    {
+      "name": "containerregistrytype",
+      "type": "pickList",
+      "label": "Container Registry Type",
+      "defaultValue": "Azure Container Registry",
+      "required": true,
+      "options": {
+        "Azure Container Registry": "Azure Container Registry",
+        "Container Registry": "Container Registry"
+      },
+      "helpMarkDown": "Select a Container Registry Type."
+    },
+    {
+      "name": "dockerRegistryEndpoint",
+      "aliases": [
+        "dockerRegistryConnection"
+      ],
+      "type": "connectedService:dockerregistry",
+      "label": "Docker Registry Connection",
+      "helpMarkDown": "Select a Docker registry connection. Required for commands that need to authenticate with a registry.",
+      "visibleRule": "containerregistrytype = Container Registry"
+    },
+    {
+      "name": "azureSubscriptionEndpoint",
+      "aliases": [
+        "azureSubscription"
+      ],
+      "type": "connectedService:AzureRM",
+      "label": "Azure subscription",
+      "helpMarkDown": "Select an Azure subscription",
+      "visibleRule": "containerregistrytype = Azure Container Registry"
+    },
+    {
+      "name": "azureContainerRegistry",
+      "label": "Azure Container Registry",
+      "type": "pickList",
+      "helpMarkDown": "Select an Azure Container Registry",
+      "visibleRule": "containerregistrytype = Azure Container Registry",
+      "defaultValue": ""
+    },
+    {
+      "name": "imageName",
+      "type": "string",
+      "label": "Image Name",
+      "defaultValue": "$(Build.Repository.Name):$(Build.BuildId)",
+      "required": true,
+      "helpMarkDown": "Name of the Docker image to build, push, or run."
+    },
+    {
+      "name": "qualifyImageName",
+      "type": "boolean",
+      "label": "Qualify Image Name",
+      "defaultValue": "true",
+      "visibleRule": "action = Build an image || action = Tag images || action = Push an image || action = Push images || action = Run an image",
+      "helpMarkDown": "Qualify the image name with the Docker registry connection's hostname if not otherwise specified."
+    },
+    {
+      "name": "includeSourceTags",
+      "type": "boolean",
+      "label": "Include Source Tags",
+      "defaultValue": "false",
+      "visibleRule": "action = Build an image || action = Tag image || action = Push an image || action = Push images",
+      "helpMarkDown": "Include Git tags when building or pushing the Docker image."
+    },
+    {
+      "name": "includeLatestTag",
+      "type": "boolean",
+      "label": "Include Latest Tag",
+      "defaultValue": "false",
+      "helpMarkDown": "Include the 'latest' tag when building or pushing the Docker image."
+    },
+    {
+      "name": "dockerFile",
+      "type": "filePath",
+      "label": "Docker File",
+      "defaultValue": "**/Dockerfile",
+      "required": true,
+      "helpMarkDown": "Path to the Docker file to use. Must be within the Docker build context."
+    },
+    {
+      "name": "additionalImageTags",
+      "type": "multiLine",
+      "properties": {
+        "resizable": "true",
+        "rows": "2"
+      },
+      "label": "Additional Image Tags",
+      "helpMarkDown": "Additional tags for the Docker image being built or pushed."
+    }
+  ],
+  "execution": {
+    "Node": {
+      "target": "index.js"
+    }
+  }
+}
