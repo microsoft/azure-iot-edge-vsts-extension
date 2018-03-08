@@ -1,35 +1,40 @@
-import path from "path";
-import tl from "vsts-task-lib/task";
-import ContainerConnection from "docker-common/containerconnection";
-import sourceUtils from "docker-common/sourceutils";
-import imageUtils from "docker-common/containerimageutils";
+const path = require('path');
+const fs = require('fs');
+const tl = require('vsts-task-lib/task');
+const ContainerConnection = require('docker-common/containerconnection').default;
+const sourceUtils = require('docker-common/sourceutils');
+const imageUtils = require('docker-common/containerimageutils');
 
-function findDockerFile(dockerfilepath) {
-  if (dockerfilepath.indexOf('*') >= 0 || dockerfilepath.indexOf('?') >= 0) {
+function findFiles(filepath) {
+  if (filepath.indexOf('*') >= 0 || filepath.indexOf('?') >= 0) {
       tl.debug(tl.loc('ContainerPatternFound'));
       var buildFolder = tl.getVariable('System.DefaultWorkingDirectory');
       var allFiles = tl.find(buildFolder);
-      var matchingResultsFiles = tl.match(allFiles, dockerfilepath, buildFolder, { matchBase: true });
+      var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, { matchBase: true });
 
       if (!matchingResultsFiles || matchingResultsFiles.length == 0) {
-          throw new Error(tl.loc('ContainerDockerFileNotFound', dockerfilepath));
+          throw new Error(tl.loc('ContainerDockerFileNotFound', filepath));
       }
 
-      return matchingResultsFiles[0];
+      return matchingResultsFiles;
   }
   else
   {
       tl.debug(tl.loc('ContainerPatternNotFound'));
-      return dockerfilepath;
+      return [filepath];
   }
 }
 
-export function run(connection) {
+function build(moduleJsonPath, deploymentJsonObject) {
   var command = connection.createCommand();
   command.arg("build");
 
+  let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
+
+
+
   var dockerfilepath = tl.getInput("dockerFile", true);
-  var dockerFile = findDockerFile(dockerfilepath);
+  var dockerFile = findDockerFile(dockerfilepath)[0];
   
   if(!tl.exist(dockerFile)) {
       throw new Error(tl.loc('ContainerDockerFileNotFound', dockerfilepath));
@@ -80,4 +85,24 @@ export function run(connection) {
   // }
   command.arg(context);
   return connection.execCommand(command);
+}
+
+function run(connection) {
+  // get all modules
+  // TODO: apply settings from moduleJsons
+  
+  try{
+    let moduleJsons = findFiles('**/module.json');
+    let deploymentJson = JSON.parse(fs.readFileSync(moduleJsonPath));
+    for(let moduleJson of moduleJsons) {
+      // error handling
+    }
+  }catch(e) {
+    return Promise.reject(e.message);
+  }
+  
+}
+
+module.exports = {
+  run
 }

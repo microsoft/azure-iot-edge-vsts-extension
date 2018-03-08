@@ -1,7 +1,10 @@
 {
   "dependencies": {
-    "del": "2.2.0",
-    "docker-common": "file:../docker-common-1.0.0.tgz",
-    "js-yaml": "3.6.1"
+    "docker-common": "file:docker-common-1.0.0.tgz",
+    "vsts-task-lib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^9.4.6",
+    "@types/q": "^1.0.7"
   }
 }
