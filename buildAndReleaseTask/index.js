@@ -6,6 +6,7 @@ const ACRAuthenticationTokenProvider = require('docker-common/registryauthentica
 const GenericAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/genericauthenticationtokenprovider').default;
 const buildImage = require('./buildimage');
 const pushImage = require('./pushimage');
+const deployImage = require('./deployimage');
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
 // Change to any specified working directory
@@ -31,30 +32,38 @@ connection.open(tl.getInput("dockerHostEndpoint"), registryAuthenticationToken);
 let action = tl.getInput("action", true);
 
 if (action === 'Build') {
+  console.log('Building image...');
   buildImage.run(connection)
     .then(() => {
       console.log('Finished building image');
       tl.setResult(tl.TaskResult.Succeeded, "");
     })
     .catch((err) => {
-      tl.setResult(tl.TaskResult.Failed, err.message);
+      tl.setResult(tl.TaskResult.Failed, err);
     });
-} else if (action === 'Build & Push') {
-
+} else if (action === 'Build and Push') {
   console.log('Building image...');
   buildImage.run(connection)
-    .then(() => {
+    .then((imageNames) => {
       console.log('Finished building image');
       console.log('Pushing image');
-      return pushImage.run(connection);
+      return pushImage.run(connection, imageNames);
     })
     .then(() => {
       console.log('Finished pushing image');
       tl.setResult(tl.TaskResult.Succeeded, "");
     })
     .catch((err) => {
-      tl.setResult(tl.TaskResult.Failed, err.message);
+      tl.setResult(tl.TaskResult.Failed, err);
     });
 } else if (action === 'Deploy to Edge device') {
-
+  console.log('Start deploying image');
+  deployImage.run(connection)
+  .then(() => {
+    console.log('Finished Deploying image');
+    tl.setResult(tl.TaskResult.Succeeded, "");
+  })
+  .catch((err) => {
+    tl.setResult(tl.TaskResult.Failed, err);
+  });
 }

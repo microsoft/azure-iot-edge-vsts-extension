@@ -15,7 +15,7 @@
     "Minor": 1,
     "Patch": 0
   },
-  "instanceNameFormat": "Edge $(count)",
+  "instanceNameFormat": "Edge $(action)",
   "groups": [
     {
       "name": "advanced",
@@ -32,7 +32,7 @@
       "required": true,
       "options": {
         "Build": "Build",
-        "Build & Push": "Build & Push",
+        "Build and Push": "Build and Push",
         "Deploy to Edge device": "Deploy to Edge device"
       },
       "helpMarkDown": "Select an Edge action."
@@ -43,7 +43,7 @@
       "label": "Container Registry Type",
       "defaultValue": "Azure Container Registry",
       "required": true,
-      "visibleRule": "action = Build",
+      "visibleRule": "action = Build and Push",
       "options": {
         "Azure Container Registry": "Azure Container Registry",
         "Container Registry": "Container Registry"
@@ -79,12 +79,28 @@
       "defaultValue": ""
     },
     {
-      "name": "imageName",
-      "type": "string",
-      "label": "Image Name -deprecated",
-      "defaultValue": "$(Build.Repository.Name):$(Build.BuildId)",
+      "name": "moduleJsons",
+      "type": "multiline",
+      "label": "Module.json File",
+      "defaultValue": "**/module.json",
       "required": true,
-      "helpMarkDown": "Name of the Docker image to build, push, or run."
+      "helpMarkDown": "Path to the modules you would like to build"
+    },
+    {
+      "name": "iothubcs",
+      "type": "string",
+      "label": "IoT Hub cs",
+      "required": true,
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": ""
+    },
+    {
+      "name": "devicecs",
+      "type": "string",
+      "label": "Device cs",
+      "required": true,
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": ""
     },
     {
       "name": "qualifyImageName",
@@ -108,22 +124,6 @@
       "helpMarkDown": "Include the 'latest' tag when building or pushing the Docker image."
     },
     {
-      "name": "moduleJsons",
-      "type": "multiline",
-      "label": "Docker File",
-      "defaultValue": "**/module.json",
-      "required": true,
-      "helpMarkDown": "Path to the modules you would like to build"
-    },
-    {
-      "name": "dockerFile",
-      "type": "filePath",
-      "label": "Docker File",
-      "defaultValue": "**/Dockerfile",
-      "required": true,
-      "helpMarkDown": "Path to the Docker file to use. Must be within the Docker build context."
-    },
-    {
       "name": "additionalImageTags",
       "type": "multiLine",
       "properties": {
@@ -131,7 +131,8 @@
         "rows": "2"
       },
       "label": "Additional Image Tags",
-      "helpMarkDown": "Additional tags for the Docker image being built or pushed."
+      "helpMarkDown": "Additional tags for the Docker image being built or pushed.",
+      "groupName": "advanced"
     },
     {
       "name": "dockerHostEndpoint",

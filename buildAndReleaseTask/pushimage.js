@@ -97,18 +97,16 @@ function getImageMappings(connection, imageNames) {
   return sourceToTargetMapping;
 }
 
-function run(connection) {
+function run(connection, imageNames) {
   // let action = tl.getInput("action", true);
   console.log('zhiqing pushimage start run');
-  let imageNames;
   let useMultiImageMode = false;// action === "Push images";
   // if (useMultiImageMode) {
   //     imageNames = utils.getImageNames();
   // } else {
-      imageNames = [tl.getInput("imageName", true)];
   // }
   
-  console.log('zhiqing before image mapping');
+  console.log('zhiqing before image mapping', imageNames);
   let imageMappings = getImageMappings(connection, imageNames);
   console.log('zhiqing after image mapping ', imageMappings);
 
