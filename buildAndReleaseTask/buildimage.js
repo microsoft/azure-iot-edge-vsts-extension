@@ -110,7 +110,13 @@ function run(connection) {
 
   try {
     console.log('zhiqing 1');
-    let moduleJsons = findFiles('**/module.json');
+    let inputs = tl.getDelimitedInput("moduleJsons", "\n");
+    let moduleJsons = new Set();
+    for(let input of inputs) {
+      for(let result of findFiles(input)) {
+        moduleJsons.add(result);
+      }
+    }
     console.log('zhiqing 2', moduleJsons);
     let deploymentJson = JSON.parse(fs.readFileSync('deployment.template.json'));
     // TODO: validate deployment.json

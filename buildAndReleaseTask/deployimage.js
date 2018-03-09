@@ -23,7 +23,7 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
       if (err) {
         reject(err);
       }
-      if (response.statusCode === 204) {
+      if (response && response.statusCode === 204) {
         resolve(deviceId);
       }else {
         console.log(response.statusCode, body);
@@ -128,8 +128,8 @@ function run(connection) {
   console.log('zhiqing c4', JSON.stringify(deploymentJson));
 
   let deviceId = 'edge4';
-  let hostName = 'zhiqing-bugbash-iot.azure-devices.net';
-  let sasToken = '21YKWMlNs0SNboShlKxbVNC5AeAItY2/QfR/fvtcG2Y=';
+  let hostName = 'iot-mj-prod.azure-devices.net';
+  let sasToken = 'uoTBPzhU8UeUzaiOzmuUmXa/oT1Kr2O+t8FSPUSOOFU=';
   let policyName = 'iothubowner';
 
   return deployToDevice(hostName, deviceId, generateSasToken(hostName, sasToken, policyName) , deploymentJson);
