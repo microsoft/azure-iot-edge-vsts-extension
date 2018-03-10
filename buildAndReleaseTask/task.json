@@ -38,6 +38,42 @@
       "helpMarkDown": "Select an Edge action."
     },
     {
+      "name": "deviceOption",
+      "type": "pickList",
+      "label": "Choose single/multiple device",
+      "required": true,
+      "options": {
+        "Single Device": "Single Device",
+        "Multiple Devices": "Multiple Devices"
+      },
+      "helpMarkDown": "Choose to deploy to single or multiple(by tags) devices",
+      "visibleRule": "action == Deploy to Edge device"
+    },
+    {
+      "name": "iothubcs",
+      "type": "string",
+      "label": "IoT Hub connection string",
+      "required": true,
+      "visibleRule": "deviceOption == Single Device || deviceOption == Multiple Devices",
+      "helpMarkDown": "Input the IoT Hub connection string (In the form HostName=xx;SharedAccessKeyName=xx;SharedAccessKey=xx)"
+    },
+    {
+      "name": "deviceId",
+      "type": "string",
+      "label": "IoT Hub device ID",
+      "required": true,
+      "visibleRule": "deviceOption == Single Device",
+      "helpMarkDown": "Input the IoT Hub device ID"
+    },
+    {
+      "name": "targetcondition",
+      "type": "string",
+      "label": "IoT Hub device Target Condition",
+      "required": true,
+      "visibleRule": "deviceOption == Multiple Devices",
+      "helpMarkDown": "Input the target condition of devices you would like to deploy. Example: tags.building=9 and tags.environment='test'"
+    },
+    {
       "name": "containerregistrytype",
       "type": "pickList",
       "label": "Container Registry Type",
@@ -87,41 +123,28 @@
       "helpMarkDown": "Path to the modules you would like to build"
     },
     {
-      "name": "iothubcs",
-      "type": "string",
-      "label": "IoT Hub cs",
-      "required": true,
-      "visibleRule": "action == Deploy to Edge device",
-      "helpMarkDown": ""
-    },
-    {
-      "name": "devicecs",
-      "type": "string",
-      "label": "Device cs",
-      "required": true,
-      "visibleRule": "action == Deploy to Edge device",
-      "helpMarkDown": ""
-    },
-    {
       "name": "qualifyImageName",
       "type": "boolean",
       "label": "Qualify Image Name",
       "defaultValue": "true",
-      "helpMarkDown": "Qualify the image name with the Docker registry connection's hostname if not otherwise specified."
+      "helpMarkDown": "Qualify the image name with the Docker registry connection's hostname if not otherwise specified.",
+      "groupName": "advanced"
     },
     {
       "name": "includeSourceTags",
       "type": "boolean",
       "label": "Include Source Tags",
       "defaultValue": "false",
-      "helpMarkDown": "Include Git tags when building or pushing the Docker image."
+      "helpMarkDown": "Include Git tags when building or pushing the Docker image.",
+      "groupName": "advanced"
     },
     {
       "name": "includeLatestTag",
       "type": "boolean",
       "label": "Include Latest Tag",
       "defaultValue": "false",
-      "helpMarkDown": "Include the 'latest' tag when building or pushing the Docker image."
+      "helpMarkDown": "Include the 'latest' tag when building or pushing the Docker image.",
+      "groupName": "advanced"
     },
     {
       "name": "additionalImageTags",
@@ -148,6 +171,11 @@
       "endpointId": "$(azureSubscriptionEndpoint)",
       "dataSourceName": "AzureRMContainerRegistries",
       "resultTemplate": "{\"Value\":\"{\\\"loginServer\\\":\\\"{{{properties.loginServer}}}\\\", \\\"id\\\" : \\\"{{{id}}}\\\"}\",\"DisplayValue\":\"{{{name}}}\"}"
+    },
+    {
+      "target": "IoTHubName",
+      "endpointId": "$(ConnectedServiceName)",
+      "dataSourceName": "AzureRMWebAppNames"
     }
   ],
   "execution": {

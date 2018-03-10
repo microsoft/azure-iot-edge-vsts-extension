@@ -47,6 +47,7 @@ if (action === 'Build') {
     .then((imageNames) => {
       console.log('Finished building image');
       console.log('Pushing image');
+      imageName = imageNames.filter(r => r !== undefined);
       return pushImage.run(connection, imageNames);
     })
     .then(() => {
@@ -59,11 +60,13 @@ if (action === 'Build') {
 } else if (action === 'Deploy to Edge device') {
   console.log('Start deploying image');
   deployImage.run(connection)
-  .then(() => {
-    console.log('Finished Deploying image');
-    tl.setResult(tl.TaskResult.Succeeded, "");
-  })
-  .catch((err) => {
-    tl.setResult(tl.TaskResult.Failed, err);
-  });
+    .then(() => {
+      console.log('Finished Deploying image');
+      tl.setResult(tl.TaskResult.Succeeded, "");
+    })
+    .catch((err) => {
+      tl.setResult(tl.TaskResult.Failed, err);
+    });
 }
+
+tl.get

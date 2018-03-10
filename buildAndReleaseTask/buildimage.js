@@ -39,6 +39,10 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
   let moduleName = path.basename(path.dirname(moduleJsonPath));
   console.log('zhiqing b3', moduleName);
 
+  if(!deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
+    console.log(`Module ${moduleName} is not specified in deployment.json, skip`);
+    return Promise.resolve();
+  }
   let imageName = deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
   let m = imageName.match(/\$\{MODULES\..*\.(.*)\}$/i);
   let platform = m[1];
