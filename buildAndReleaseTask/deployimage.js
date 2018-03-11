@@ -13,47 +13,30 @@ class azureclitask {
   static runMain(deploymentJson) {
     var toolExecutionError = null;
     try {
-      // var tool;
-      // if (os.type() != "Windows_NT") {
-      //   tool = tl.tool(tl.which("bash", true));
-      // }
+      let iothub = tl.getInput("iothubname", true);
+      let configId = tl.getInput("deploymentid", true);
+      let deviceOption = tl.getInput("deviceOption", true);
+      let targetCondition;
 
-      var scriptLocation = tl.getInput("scriptLocation");
-      var scriptPath = null;
-      // var cwd = tl.getPathInput("cwd", true, false);
-
-      let iothub = 'iot-mj-prod';
-      let configId = 'vsts-created';
+      if (deviceOption === 'Single Device') {
+        let deviceId = tl.getInput("deviceId", true);
+        targetCondition = `deviceId='${deviceId}'`;
+      } else {
+        targetCondition = tl.getInput("targetcondition", true);
+      }
 
       let deploymentJsonPath = path.resolve(os.tmpdir(), `deployment_${new Date().getTime()}.json`);
-      fs.writeFileSync(deploymentJsonPath, JSON.stringify({content:deploymentJson}, null, 2));
+      fs.writeFileSync(deploymentJsonPath, JSON.stringify({ content: deploymentJson }, null, 2));
 
       let script1 = `iot edge deployment delete --hub-name ${iothub} --config-id ${configId}`;
-      let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition tags.environment='prod'`;
-      // var script = `az iot edge deployment delete --hub-name ${iothub}
-      // az iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition "tags.environment='prod'"`;
-      // if (os.type() != "Windows_NT") {
-      //   scriptPath = path.join(os.tmpdir(), "azureclitaskscript" + new Date().getTime() + ".sh");
-      // }
-      // else {
-      //   scriptPath = path.join(os.tmpdir(), "azureclitaskscript" + new Date().getTime() + ".bat");
-      // }
-      // this.createFile(scriptPath, script);
-
-      // tl.mkdirP(cwd);
-      // tl.cd(cwd);
-
-      // if (os.type() != "Windows_NT") {
-      //   tool.arg(scriptPath);
-      // }
-      // else {
-      //   tool = tl.tool(tl.which(scriptPath, true));
-      // }
+      let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition ${targetCondition}`;
 
       this.loginAzure();
 
-      console.log(tl.execSync('az', '--version'));
-      console.log(tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug'));
+      let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
+      if (addResult.code === 1) {
+        throw new Error(addResult.stderr);
+      }
 
       let result1 = tl.execSync('az', script1);
       console.log(result1);
@@ -72,9 +55,6 @@ class azureclitask {
       //go to finally and logout of azure and set task result
     }
     finally {
-      if (scriptLocation === "inlineScript") {
-        this.deleteFile(scriptPath);
-      }
       //Logout of Azure if logged in
       if (this.isLoggedIn) {
         this.logoutAzure();
@@ -278,24 +258,11 @@ function run(connection) {
   }
   console.log('zhiqing c4', JSON.stringify(deploymentJson));
 
-  let deviceOption = tl.getInput("deviceOption", true);
-  if (deviceOption === 'Single Device') {
-    let deviceId = tl.getInput("deviceId", true);
-    let [hostName, sasToken, policyName] = parseIoTCS(tl.getInput("iothubcs", true));
-    //HostName=iot-mj-prod.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=uoTBPzhU8UeUzaiOzmuUmXa/oT1Kr2O+t8FSPUSOOFU=
-    return deployToDevice(hostName, deviceId, generateSasToken(hostName, sasToken, policyName), deploymentJson);
-  } else {
-    // TODO: limit to single quote
-    let condition = tl.getInput("targetcondition", true);
-    if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
-      return Promise.reject(new Error('Azure SDK not found'));
-    }
-    return azureclitask.runMain(deploymentJson);
+  if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
+    return Promise.reject(new Error('Azure SDK not found'));
   }
-
-
+  return azureclitask.runMain(deploymentJson);
 }
-console.log(generateSasToken('iot-mj-prod.azure-devices.net', 'uoTBPzhU8UeUzaiOzmuUmXa/oT1Kr2O+t8FSPUSOOFU=', 'iothubowner'))
 
 module.exports = {
   run

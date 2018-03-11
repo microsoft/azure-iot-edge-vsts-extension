@@ -38,6 +38,23 @@
       "helpMarkDown": "Select an Edge action."
     },
     {
+      "name": "iothubname",
+      "type": "string",
+      "label": "IoT Hub name",
+      "required": true,
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": "Input the IoT Hub Name"
+    },
+    {
+      "name": "deploymentid",
+      "type": "string",
+      "label": "IoT Edge Deployment ID",
+      "required": true,
+      "defaultValue": "vsts-deployment",
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": "Input the IoT Edge Deployment ID, if ID exists, it will be overridden"
+    },
+    {
       "name": "deviceOption",
       "type": "pickList",
       "label": "Choose single/multiple device",
@@ -50,12 +67,15 @@
       "visibleRule": "action == Deploy to Edge device"
     },
     {
-      "name": "iothubcs",
-      "type": "string",
-      "label": "IoT Hub connection string",
+      "name": "connectedServiceNameARM",
+      "aliases": [
+        "azureSubscription"
+      ],
+      "type": "connectedService:AzureRM",
+      "label": "Azure subscription contains IoT Hub",
       "required": true,
-      "visibleRule": "deviceOption == Single Device || deviceOption == Multiple Devices",
-      "helpMarkDown": "Input the IoT Hub connection string (In the form HostName=xx;SharedAccessKeyName=xx;SharedAccessKey=xx)"
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": "Select an Azure subscription that contains IoT Hub"
     },
     {
       "name": "deviceId",
@@ -66,23 +86,12 @@
       "helpMarkDown": "Input the IoT Hub device ID"
     },
     {
-      "name": "connectedServiceNameARM",
-      "aliases": [
-        "azureSubscription"
-      ],
-      "type": "connectedService:AzureRM",
-      "label": "Azure subscription",
-      "required": true,
-      "visibleRule": "deviceOption == Multiple Devices",
-      "helpMarkDown": "Select an Azure resource manager subscription for the deployment"
-    },
-    {
       "name": "targetcondition",
       "type": "string",
       "label": "IoT Hub device Target Condition",
       "required": true,
       "visibleRule": "deviceOption == Multiple Devices",
-      "helpMarkDown": "Input the target condition of devices you would like to deploy. Example: tags.building=9 and tags.environment='test'"
+      "helpMarkDown": "Input the target condition of devices you would like to deploy. Do not use double quote. Example: tags.building=9 and tags.environment='test'"
     },
     {
       "name": "containerregistrytype",
@@ -127,6 +136,7 @@
       "type": "multiline",
       "label": "Module.json File",
       "defaultValue": "**/module.json",
+      "visibleRule": "action = Build || action = Build and Push",
       "required": true,
       "helpMarkDown": "Path to the modules you would like to build"
     },
