@@ -138,7 +138,7 @@
       "defaultValue": "**/module.json",
       "visibleRule": "action = Build || action = Build and Push",
       "required": true,
-      "helpMarkDown": "Path to the modules you would like to build"
+      "helpMarkDown": "Path to the modules you would like to build. You can specify multiple files, each take one line"
     },
     {
       "name": "qualifyImageName",

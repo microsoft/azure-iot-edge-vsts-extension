@@ -3,7 +3,9 @@ const path = require('path');
 const tl = require('vsts-task-lib/task');
 const request = require('request');
 const crypto = require('crypto');
-const os = require('os')
+const os = require('os');
+const util = require('./util');
+const constants = require('./constant');
 
 class azureclitask {
   static checkIfAzurePythonSdkIsInstalled() {
@@ -203,39 +205,29 @@ function run(connection) {
   let deploymentJson = JSON.parse(fs.readFileSync('deployment.template.json'));
   let moduleJsons = findFiles('**/module.json');
   // TODO: validate deployment.json
-  console.log('zhiqing c1', JSON.stringify(deploymentJson));
 
-  // TODO: replace env variables
   for (let systemModule of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'])) {
     let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;
-    if (originalImage.includes('${RUNTIME_TAG}')) {
-      originalImage = originalImage.replace('${RUNTIME_TAG}', 'latest');
-    }
     deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image = originalImage;
   }
-  console.log('zhiqing c2');
 
   for (let module of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'])) {
     let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image;
-    if (originalImage.includes('${RUNTIME_TAG}')) {
-      originalImage = originalImage.replace('${RUNTIME_TAG}', 'latest');
-    }
     deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
   }
-  console.log('zhiqing c3');
+
+  // Expand environment variables
+  deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
 
   for (let moduleJsonPath of moduleJsons) {
     // error handling
     if (!fs.existsSync(moduleJsonPath)) {
       throw new Error('module.json not found');
     }
-    console.log('zhiqing b1', moduleJsonPath);
     let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
-    console.log('zhiqing b2');
     // TODO: validate module.json
 
     let moduleName = path.basename(path.dirname(moduleJsonPath));
-    console.log('zhiqing b3', moduleName);
 
     if (!deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
       console.log(`Skip module ${moduleName} since not specified in deployment.json`);
@@ -256,7 +248,6 @@ function run(connection) {
     imageName = (`${repository}:${version}-${platform}`).toLowerCase();
     deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
   }
-  console.log('zhiqing c4', JSON.stringify(deploymentJson));
 
   if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
     return Promise.reject(new Error('Azure SDK not found'));
