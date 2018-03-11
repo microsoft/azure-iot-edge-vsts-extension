@@ -26,10 +26,10 @@ class azureclitask {
       let configId = 'vsts-created';
 
       let deploymentJsonPath = path.resolve(os.tmpdir(), `deployment_${new Date().getTime()}.json`);
-      fs.writeFileSync(deploymentJsonPath, JSON.stringify(deploymentJson, null, 2));
+      fs.writeFileSync(deploymentJsonPath, JSON.stringify({content:deploymentJson}, null, 2));
 
-      let script1 = `iot edge deployment delete --hub-name ${iothub}`;
-      let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition "tags.environment='prod'"`;
+      let script1 = `iot edge deployment delete --hub-name ${iothub} --config-id ${configId}`;
+      let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition tags.environment='prod'`;
       // var script = `az iot edge deployment delete --hub-name ${iothub}
       // az iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition "tags.environment='prod'"`;
       // if (os.type() != "Windows_NT") {
@@ -51,6 +51,9 @@ class azureclitask {
       // }
 
       this.loginAzure();
+
+      console.log(tl.execSync('az', '--version'));
+      console.log(tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug'));
 
       let result1 = tl.execSync('az', script1);
       console.log(result1);

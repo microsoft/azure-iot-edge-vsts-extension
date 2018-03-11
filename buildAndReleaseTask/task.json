@@ -66,6 +66,17 @@
       "helpMarkDown": "Input the IoT Hub device ID"
     },
     {
+      "name": "connectedServiceNameARM",
+      "aliases": [
+        "azureSubscription"
+      ],
+      "type": "connectedService:AzureRM",
+      "label": "Azure subscription",
+      "required": true,
+      "visibleRule": "deviceOption == Multiple Devices",
+      "helpMarkDown": "Select an Azure resource manager subscription for the deployment"
+    },
+    {
       "name": "targetcondition",
       "type": "string",
       "label": "IoT Hub device Target Condition",
@@ -98,9 +109,6 @@
     },
     {
       "name": "azureSubscriptionEndpoint",
-      "aliases": [
-        "azureSubscription"
-      ],
       "type": "connectedService:AzureRM",
       "label": "Azure subscription",
       "helpMarkDown": "Select an Azure subscription",
