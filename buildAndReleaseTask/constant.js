@@ -1,5 +1,5 @@
 let constant = {
-  exceptStr = ["$edgeHub", "$edgeAgent", "$upstream"]
+  exceptStr: ["$edgeHub", "$edgeAgent", "$upstream"]
 }
 
 module.exports = constant;

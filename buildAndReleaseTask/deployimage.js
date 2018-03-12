@@ -35,9 +35,44 @@ class azureclitask {
 
       this.loginAzure();
 
+      console.log('OS release:',os.release());
+
+      // In Linux environment, sometimes when install az extension, libffi.so.5 file is missing. Here is a quick fix.
+      // if (os.type() === 'Linux') {
+      //   console.log(os.release());
+      //   console.log(os.platform());
+      //   // console.log(tl.ls("/usr/lib/i386-linux-gnu"));
+
+      //   // if (!tl.includes('libffi.so.5')) {
+      //   //   console.log('libffi.so.5 not found, do symbol link');
+      //   //   console.log(tl.execSync('ln', '-s /usr/lib/i386-linux-gnu/libffi.so.6 /usr/lib/i386-linux-gnu/libffi.so.5'));
+      //   // }
+      //   console.log(tl.execSync('apt-get', 'install --reinstall libffi5'));
+      // }
+
       let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
       if (addResult.code === 1) {
-        throw new Error(addResult.stderr);
+        if(addResult.stderr.includes('ImportError: libffi.so.5')) {
+          console.log('ImportError: libffi.so.5: cannot open shared object file: No such file or directory. Try to fix...');
+          let azRepo = tl.execSync('lsb_release', '-cs').stdout.trim();
+          console.log(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list'));
+          fs.writeFileSync('/etc/apt/sources.list.d/azure-cli.list', `deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`);
+          // console.log(tl.execSync('echo', `"deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main" | tee /etc/apt/sources.list.d/azure-cli.list`));
+          console.log(tl.execSync('cat', '/etc/apt/sources.list.d/azure-cli.list'));
+          console.log(tl.execSync('apt-key', 'adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893'));
+          console.log(tl.execSync('apt-get', 'install apt-transport-https'));
+          console.log(tl.execSync('apt-get', 'update'));
+          console.log(tl.execSync('apt-get', '--assume-yes remove azure-cli'));
+          console.log(tl.execSync('apt-get', '--assume-yes install azure-cli'));
+          let r = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
+          console.log(r);
+          if(r.code === 1) {
+            throw new Error(r.stderr);
+          }
+        }else {
+          throw new Error(addResult.stderr);
+        }
+        
       }
 
       let result1 = tl.execSync('az', script1);

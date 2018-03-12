@@ -1,10 +1,10 @@
 {
   "id": "80F3F6A0-82A6-4A22-BA7A-E5B8C541B9B8",
-  "name": "zhiqing-edge-test-name",
-  "friendlyName": "Zhiqing EDGE test",
-  "description": "Zhiqing EDGE test - description",
+  "name": "edge-cicd-task",
+  "friendlyName": "IoT Edge CI/CD",
+  "description": "IoT Edge CI/CD",
   "helpMarkDown": "",
-  "category": "Utility",
+  "category": "Build",
   "visibility": [
     "Build",
     "Release"
@@ -38,6 +38,17 @@
       "helpMarkDown": "Select an Edge action."
     },
     {
+      "name": "connectedServiceNameARM",
+      "aliases": [
+        "azureSubscription"
+      ],
+      "type": "connectedService:AzureRM",
+      "label": "Azure subscription contains IoT Hub",
+      "required": true,
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": "Select an Azure subscription that contains IoT Hub"
+    },
+    {
       "name": "iothubname",
       "type": "string",
       "label": "IoT Hub name",
@@ -65,17 +76,6 @@
       },
       "helpMarkDown": "Choose to deploy to single or multiple(by tags) devices",
       "visibleRule": "action == Deploy to Edge device"
-    },
-    {
-      "name": "connectedServiceNameARM",
-      "aliases": [
-        "azureSubscription"
-      ],
-      "type": "connectedService:AzureRM",
-      "label": "Azure subscription contains IoT Hub",
-      "required": true,
-      "visibleRule": "action == Deploy to Edge device",
-      "helpMarkDown": "Select an Azure subscription that contains IoT Hub"
     },
     {
       "name": "deviceId",
