@@ -17,6 +17,7 @@ class azureclitask {
     try {
       let iothub = tl.getInput("iothubname", true);
       let configId = tl.getInput("deploymentid", true);
+      let priority = tl.getInput("priority", true);
       let deviceOption = tl.getInput("deviceOption", true);
       let targetCondition;
 
@@ -30,8 +31,11 @@ class azureclitask {
       let deploymentJsonPath = path.resolve(os.tmpdir(), `deployment_${new Date().getTime()}.json`);
       fs.writeFileSync(deploymentJsonPath, JSON.stringify({ content: deploymentJson }, null, 2));
 
+      priority = parseInt(priority);
+      priority = isNaN(priority) ? 0 : priority;
+
       let script1 = `iot edge deployment delete --hub-name ${iothub} --config-id ${configId}`;
-      let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition ${targetCondition}`;
+      let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition ${targetCondition} --priority ${priority}`;
 
       this.loginAzure();
 

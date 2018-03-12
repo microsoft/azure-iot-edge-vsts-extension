@@ -66,6 +66,15 @@
       "helpMarkDown": "Input the IoT Edge Deployment ID, if ID exists, it will be overridden"
     },
     {
+      "name": "priority",
+      "type": "string",
+      "label": "Priority of deployment",
+      "required": true,
+      "defaultValue": "0",
+      "visibleRule": "action == Deploy to Edge device",
+      "helpMarkDown": "Set the priority to a positive integer to resolve deployment conflicts: when targeted by multiple deployments a device will use the one with highest priority or (in case of two deployments with the same priority) latest creation time."
+    },
+    {
       "name": "deviceOption",
       "type": "pickList",
       "label": "Choose single/multiple device",
