@@ -4,25 +4,8 @@ const tl = require('vsts-task-lib/task');
 const ContainerConnection = require('docker-common/containerconnection').default;
 const sourceUtils = require('docker-common/sourceutils');
 const imageUtils = require('docker-common/containerimageutils');
-
-function findFiles(filepath) {
-  if (filepath.indexOf('*') >= 0 || filepath.indexOf('?') >= 0) {
-    tl.debug(tl.loc('ContainerPatternFound'));
-    var buildFolder = tl.getVariable('System.DefaultWorkingDirectory');
-    var allFiles = tl.find(buildFolder);
-    var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, { matchBase: true });
-
-    if (!matchingResultsFiles || matchingResultsFiles.length == 0) {
-      throw new Error(tl.loc('ContainerDockerFileNotFound', filepath));
-    }
-
-    return matchingResultsFiles;
-  }
-  else {
-    tl.debug(tl.loc('ContainerPatternNotFound'));
-    return [filepath];
-  }
-}
+const constants = require('./constant');
+const util = require('./util');
 
 function build(connection, moduleJsonPath, deploymentJsonObject) {
   var command = connection.createCommand();
@@ -32,7 +15,8 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
     throw new Error('module.json not found');
   }
   let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
-  // TODO: validate module.json
+  // Error handling: validate module.json
+  util.validateModuleJson(moduleJson);
 
   let moduleName = path.basename(path.dirname(moduleJsonPath));
 
@@ -54,18 +38,6 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
   let dockerFile = path.resolve(path.dirname(moduleJsonPath), dockerFileRelative);
 
   command.arg(["-f", dockerFile]);
-
-  // tl.getDelimitedInput("buildArguments", "\n").forEach(buildArgument => {
-  //     command.arg(["--build-arg", buildArgument]);
-  // });
-
-  // var imageName = tl.getInput("imageName", true);
-  // var qualifyImageName = tl.getBoolInput("qualifyImageName");
-  // if (qualifyImageName) {
-  // 	imageName = connection.qualifyImageName(imageName);
-  // }
-
-  // let imageName = `${moduleName}:${process.env.BUILD_BUILDID || '0'}`;
 
   imageName = (`${repository}:${version}-${platform}`).toLowerCase();
   command.arg(["-t", imageName]);
@@ -93,34 +65,35 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
     command.arg(["-m", memory]);
   }
 
-  var context;
-  // var defaultContext = tl.getBoolInput("defaultContext");
-  // if (defaultContext) {
-  context = path.dirname(dockerFile);
-  // } else {
-  //     context = tl.getPathInput("context");
-  // }
+  let context = path.dirname(dockerFile);
   command.arg(context);
   return connection.execCommand(command).then(() => imageName);
 }
 
 function run(connection) {
   // get all modules
-  // TODO: apply settings from moduleJsons
-
   try {
     let inputs = tl.getDelimitedInput("moduleJsons", "\n");
+    // Error handling: Remind for empty set
+    if(!inputs || inputs.length === 0) {
+      return Promise.reject(new Error('module.json setting is empty. So no modules will be built'));
+    }
     let moduleJsons = new Set();
     for (let input of inputs) {
-      for (let result of findFiles(input)) {
+      for (let result of util.findFiles(input, tl)) {
         moduleJsons.add(result);
       }
     }
-    let deploymentJson = JSON.parse(fs.readFileSync('deployment.template.json'));
-    // TODO: validate deployment.json
+    if(!fs.existsSync(constants.fileNameDeployTemplateJson)) {
+      return Promise.reject(new Error(`File ${constants.fileNameDeployTemplateJson} doesn't exist in the project root folder`));
+    }
+    let deploymentJson = JSON.parse(fs.readFileSync(constants.fileNameDeployTemplateJson));
+    // Error handling: validate deployment.json, will catch the error if property not exist
+    util.validateDeployTemplateJson(deploymentJson);
+
     let promises = [];
+    
     for (let moduleJson of moduleJsons) {
-      // error handling
       promises.push(build(connection, moduleJson, deploymentJson));
     }
     return Promise.all(promises);

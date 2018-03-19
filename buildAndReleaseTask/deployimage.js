@@ -39,7 +39,7 @@ class azureclitask {
 
       this.loginAzure();
 
-      console.log('OS release:',os.release());
+      console.log('OS release:', os.release());
 
       // In Linux environment, sometimes when install az extension, libffi.so.5 file is missing. Here is a quick fix.
       // if (os.type() === 'Linux') {
@@ -56,7 +56,7 @@ class azureclitask {
 
       let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
       if (addResult.code === 1) {
-        if(addResult.stderr.includes('ImportError: libffi.so.5')) {
+        if (addResult.stderr.includes('ImportError: libffi.so.5')) {
           console.log('ImportError: libffi.so.5: cannot open shared object file: No such file or directory. Try to fix...');
           let azRepo = tl.execSync('lsb_release', '-cs').stdout.trim();
           console.log(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list'));
@@ -70,18 +70,20 @@ class azureclitask {
           console.log(tl.execSync('apt-get', '--assume-yes install azure-cli'));
           let r = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
           console.log(r);
-          if(r.code === 1) {
+          if (r.code === 1) {
             throw new Error(r.stderr);
           }
-        }else {
+        } else {
           throw new Error(addResult.stderr);
         }
-        
+
       }
 
       let result1 = tl.execSync('az', script1);
-      console.log(result1);
       let result2 = tl.execSync('az', script2);
+      if(result2.code !== 0) {
+        throw new Error(`Error for deployment: ${result2.stderr}`);
+      }
       console.log(result2);
 
       return Promise.resolve();
@@ -195,103 +197,66 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
   });
 }
 
-// TODO: duplicated
-function findFiles(filepath) {
-  if (filepath.indexOf('*') >= 0 || filepath.indexOf('?') >= 0) {
-    tl.debug(tl.loc('ContainerPatternFound'));
-    var buildFolder = tl.getVariable('System.DefaultWorkingDirectory');
-    var allFiles = tl.find(buildFolder);
-    var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, { matchBase: true });
-
-    if (!matchingResultsFiles || matchingResultsFiles.length == 0) {
-      throw new Error(tl.loc('ContainerDockerFileNotFound', filepath));
-    }
-
-    return matchingResultsFiles;
-  }
-  else {
-    tl.debug(tl.loc('ContainerPatternNotFound'));
-    return [filepath];
-  }
-}
-
-function generateSasToken(resourceUri, signingKey, policyName, expiresInMins = 3600) {
-  resourceUri = encodeURIComponent(resourceUri);
-
-  // Set expiration in seconds
-  var expires = (Date.now() / 1000) + expiresInMins * 60;
-  expires = Math.ceil(expires);
-  var toSign = resourceUri + '\n' + expires;
-
-  // Use crypto
-  var hmac = crypto.createHmac('sha256', new Buffer(signingKey, 'base64'));
-  hmac.update(toSign);
-  var base64UriEncoded = encodeURIComponent(hmac.digest('base64'));
-
-  // Construct autorization string
-  var token = "SharedAccessSignature sr=" + resourceUri + "&sig="
-    + base64UriEncoded + "&se=" + expires;
-  if (policyName) token += "&skn=" + policyName;
-  return token;
-};
-
-function parseIoTCS(cs) {
-  let m = cs.match(/HostName=(.*);SharedAccessKeyName=(.*);SharedAccessKey=(.*)$/);
-  return m.slice(1);
-}
-
 function run(connection) {
-  let deploymentJson = JSON.parse(fs.readFileSync('deployment.template.json'));
-  let moduleJsons = findFiles('**/module.json');
-  // TODO: validate deployment.json
+  try {
+    let deploymentJson = JSON.parse(fs.readFileSync(constants.fileNameDeployTemplateJson));
 
-  for (let systemModule of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'])) {
-    let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;
-    deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image = originalImage;
-  }
+    let moduleJsons = util.findFiles(`**/${constants.fileNameModuleJson}`, tl);
+    // Error handling: validate deployment.json
+    util.validateDeployTemplateJson(deploymentJson);
 
-  for (let module of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'])) {
-    let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image;
-    deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
-  }
-
-  // Expand environment variables
-  deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
-
-  for (let moduleJsonPath of moduleJsons) {
-    // error handling
-    if (!fs.existsSync(moduleJsonPath)) {
-      throw new Error('module.json not found');
-    }
-    let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
-    // TODO: validate module.json
-
-    let moduleName = path.basename(path.dirname(moduleJsonPath));
-
-    if (!deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
-      console.log(`Skip module ${moduleName} since not specified in deployment.json`);
-      continue;
-    }
-    let imageName = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
-    let m = imageName.match(/\$\{MODULES\..*\.(.*)\}$/i);
-    let platform = m[1];
-
-    if (!platform) {
-      throw new Error(`Module ${moduleName} in deployment.json doesn't contain platform`);
+    for (let systemModule of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'])) {
+      let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;
+      deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image = originalImage;
     }
 
-    // TODO: check repository align with build definition
-    let repository = moduleJson.image.repository;
-    let version = moduleJson.image.tag.version;
+    for (let module of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'])) {
+      let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image;
+      deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
+    }
 
-    imageName = (`${repository}:${version}-${platform}`).toLowerCase();
-    deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
-  }
+    // Expand environment variables
+    deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
 
-  if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
-    return Promise.reject(new Error('Azure SDK not found'));
+    for (let moduleJsonPath of moduleJsons) {
+      // error handling
+      if (!fs.existsSync(moduleJsonPath)) {
+        throw new Error('module.json not found');
+      }
+      let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
+      // Error handling: validate module.json
+      util.validateModuleJson(moduleJson);
+
+      let moduleName = path.basename(path.dirname(moduleJsonPath));
+
+      if (!deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
+        console.log(`Skip module ${moduleName} since not specified in deployment.json`);
+        continue;
+      }
+      let imageName = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
+      let m = imageName.match(/\$\{MODULES\..*\.(.*)\}$/i);
+      let platform = m[1];
+
+      if (!platform) {
+        throw new Error(`Module ${moduleName} in deployment.json doesn't contain platform`);
+      }
+
+      // TODO: check repository align with build definition
+      let repository = moduleJson.image.repository;
+      let version = moduleJson.image.tag.version;
+
+      imageName = (`${repository}:${version}-${platform}`).toLowerCase();
+      deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
+    }
+
+    if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
+      throw new Error('Azure SDK not found');
+    }
+    return azureclitask.runMain(deploymentJson);
   }
-  return azureclitask.runMain(deploymentJson);
+  catch (e) {
+    return Promise.reject(e);
+  }
 }
 
 module.exports = {

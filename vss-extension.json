@@ -1,8 +1,8 @@
 {
   "manifestVersion": 1,
-  "id": "build-release-task",
-  "name": "IoT Edge Build and Release",
-  "version": "0.0.114",
+  "id": "iot-edge-build-deploy",
+  "name": "IoT Edge Build and Deploy",
+  "version": "0.0.119",
   "publisher": "michaeljqzq",
   "targets": [
     {
