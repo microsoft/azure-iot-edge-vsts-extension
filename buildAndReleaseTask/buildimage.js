@@ -32,7 +32,6 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
   let platform = m[1];
 
   let dockerFileRelative = moduleJson.image.tag.platforms[platform];
-  // TODO: check repository align with build definition
   let repository = moduleJson.image.repository;
   let version = moduleJson.image.tag.version;
   let dockerFile = path.resolve(path.dirname(moduleJsonPath), dockerFileRelative);

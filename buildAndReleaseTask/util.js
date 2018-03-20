@@ -19,7 +19,6 @@ class Util {
       throw new Error(`${constants.fileNameModuleJson} image.tag.platforms not set`);
     }
     if(moduleJsonObject.image.repository == undefined) {
-      console.log('zhiqing undefined find');
       throw new Error(`${constants.fileNameModuleJson} image.repository not set`);
     }
     if(moduleJsonObject.image.tag.version == undefined) {
