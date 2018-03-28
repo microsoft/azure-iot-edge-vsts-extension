@@ -68,5 +68,3 @@ if (action === 'Build') {
       tl.setResult(tl.TaskResult.Failed, err);
     });
 }
-
-tl.get
