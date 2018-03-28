@@ -150,41 +150,6 @@
       "defaultValue": ""
     },
     {
-      "name": "qualifyImageName",
-      "type": "boolean",
-      "label": "Qualify Image Name",
-      "defaultValue": "true",
-      "helpMarkDown": "Qualify the image name with the Docker registry connection's hostname if not otherwise specified.",
-      "groupName": "advanced"
-    },
-    {
-      "name": "includeSourceTags",
-      "type": "boolean",
-      "label": "Include Source Tags",
-      "defaultValue": "false",
-      "helpMarkDown": "Include Git tags when building or pushing the Docker image.",
-      "groupName": "advanced"
-    },
-    {
-      "name": "includeLatestTag",
-      "type": "boolean",
-      "label": "Include Latest Tag",
-      "defaultValue": "false",
-      "helpMarkDown": "Include the 'latest' tag when building or pushing the Docker image.",
-      "groupName": "advanced"
-    },
-    {
-      "name": "additionalImageTags",
-      "type": "multiLine",
-      "properties": {
-        "resizable": "true",
-        "rows": "2"
-      },
-      "label": "Additional Image Tags",
-      "helpMarkDown": "Additional tags for the Docker image being built or pushed.",
-      "groupName": "advanced"
-    },
-    {
       "name": "dockerHostEndpoint",
       "type": "connectedService:dockerhost",
       "label": "Docker Host Connection",
