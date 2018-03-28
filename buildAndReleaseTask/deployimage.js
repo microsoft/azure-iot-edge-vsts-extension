@@ -45,7 +45,7 @@ class azureclitask {
       let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
       if (addResult.code === 1) {
         if (addResult.stderr.includes('ImportError: libffi.so.5')) {
-          console.log('ImportError: libffi.so.5: cannot open shared object file: No such file or directory. Try to fix...');
+          console.log(`\n--------------------Error--------------------.\n Something wrong with built-in Azure CLI in agent, can't install az-cli-iot-ext.\nTry to fix with reinstall the ${azRepo} version of Azure CLI.\n\n`);
           let azRepo = tl.execSync('lsb_release', '-cs').stdout.trim();
           console.log(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list'));
           fs.writeFileSync('/etc/apt/sources.list.d/azure-cli.list', `deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`);
@@ -71,7 +71,6 @@ class azureclitask {
       if(result2.code !== 0) {
         throw new Error(`Error for deployment: ${result2.stderr}`);
       }
-      console.log(result2);
 
       return Promise.resolve();
     }
