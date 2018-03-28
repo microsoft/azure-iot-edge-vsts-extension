@@ -68,7 +68,7 @@
     {
       "name": "priority",
       "type": "string",
-      "label": "Priority of deployment",
+      "label": "IoT Edge Deployment priority",
       "required": true,
       "defaultValue": "0",
       "visibleRule": "action == Deploy to Edge device",
@@ -89,18 +89,27 @@
     {
       "name": "deviceId",
       "type": "string",
-      "label": "IoT Hub device ID",
+      "label": "Edge device ID",
       "required": true,
       "visibleRule": "deviceOption == Single Device",
-      "helpMarkDown": "Input the IoT Hub device ID"
+      "helpMarkDown": "Input the Edge device ID"
     },
     {
       "name": "targetcondition",
       "type": "string",
-      "label": "IoT Hub device Target Condition",
+      "label": "Edge device Target Condition",
       "required": true,
       "visibleRule": "deviceOption == Multiple Devices",
       "helpMarkDown": "Input the target condition of devices you would like to deploy. Do not use double quote. Example: tags.building=9 and tags.environment='test'"
+    },
+    {
+      "name": "moduleJsons",
+      "type": "multiline",
+      "label": "Module.json File",
+      "defaultValue": "**/module.json",
+      "visibleRule": "action = Build || action = Build and Push",
+      "required": true,
+      "helpMarkDown": "Path to the modules you would like to build. You can specify multiple files, each take one line. Reference for wildcard: https://docs.microsoft.com/en-us/vsts/build-release/tasks/file-matching-patterns?view=vsts"
     },
     {
       "name": "containerregistrytype",
@@ -139,15 +148,6 @@
       "helpMarkDown": "Select an Azure Container Registry",
       "visibleRule": "containerregistrytype = Azure Container Registry",
       "defaultValue": ""
-    },
-    {
-      "name": "moduleJsons",
-      "type": "multiline",
-      "label": "Module.json File",
-      "defaultValue": "**/module.json",
-      "visibleRule": "action = Build || action = Build and Push",
-      "required": true,
-      "helpMarkDown": "Path to the modules you would like to build. You can specify multiple files, each take one line"
     },
     {
       "name": "qualifyImageName",
@@ -198,11 +198,6 @@
       "endpointId": "$(azureSubscriptionEndpoint)",
       "dataSourceName": "AzureRMContainerRegistries",
       "resultTemplate": "{\"Value\":\"{\\\"loginServer\\\":\\\"{{{properties.loginServer}}}\\\", \\\"id\\\" : \\\"{{{id}}}\\\"}\",\"DisplayValue\":\"{{{name}}}\"}"
-    },
-    {
-      "target": "IoTHubName",
-      "endpointId": "$(ConnectedServiceName)",
-      "dataSourceName": "AzureRMWebAppNames"
     }
   ],
   "execution": {

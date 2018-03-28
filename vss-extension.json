@@ -2,14 +2,14 @@
   "manifestVersion": 1,
   "id": "iot-edge-build-deploy",
   "name": "IoT Edge Build and Deploy",
-  "version": "0.0.120",
+  "version": "0.0.121",
   "publisher": "michaeljqzq",
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"
     }
   ],
-  "description": "Tools for building/releasing IoT Edge module.",
+  "description": "A tool for continuous integration(build and push docker image) and continuous deployment(create Edge deployment on Azure)",
   "categories": [
     "Build and release"
   ],
