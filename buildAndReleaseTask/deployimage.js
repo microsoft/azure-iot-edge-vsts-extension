@@ -45,8 +45,8 @@ class azureclitask {
       let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
       if (addResult.code === 1) {
         if (addResult.stderr.includes('ImportError: libffi.so.5')) {
-          console.log(`\n--------------------Error--------------------.\n Something wrong with built-in Azure CLI in agent, can't install az-cli-iot-ext.\nTry to fix with reinstall the ${azRepo} version of Azure CLI.\n\n`);
           let azRepo = tl.execSync('lsb_release', '-cs').stdout.trim();
+          console.log(`\n--------------------Error--------------------.\n Something wrong with built-in Azure CLI in agent, can't install az-cli-iot-ext.\nTry to fix with reinstall the ${azRepo} version of Azure CLI.\n\n`);
           console.log(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list'));
           fs.writeFileSync('/etc/apt/sources.list.d/azure-cli.list', `deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`);
           console.log(tl.execSync('cat', '/etc/apt/sources.list.d/azure-cli.list'));
