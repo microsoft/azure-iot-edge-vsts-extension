@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "iot-edge-build-deploy",
   "name": "IoT Edge Build and Deploy",
-  "version": "0.0.123",
+  "version": "0.0.124",
   "publisher": "michaeljqzq",
   "targets": [
     {
@@ -13,6 +13,17 @@
   "categories": [
     "Build and release"
   ],
+  "tags": [
+    "Build task",
+    "Deploy task",
+    "Azure IoT",
+    "Edge"
+  ],
+  "content": {
+    "details": {
+      "path": "overview.md"
+    }
+  },
   "icons": {
     "default": "images/extension-icon.png"
   },
@@ -33,7 +44,5 @@
       }
     }
   ],
-  "scopes": [
-
-  ]
+  "scopes": []
 }
