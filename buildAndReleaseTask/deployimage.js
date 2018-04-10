@@ -41,6 +41,7 @@ class azureclitask {
 
       console.log('OS release:', os.release());
 
+      // WORK AROUND
       // In Linux environment, sometimes when install az extension, libffi.so.5 file is missing. Here is a quick fix.
       let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
       if (addResult.code === 1) {
@@ -63,7 +64,6 @@ class azureclitask {
         } else {
           throw new Error(addResult.stderr);
         }
-
       }
 
       let result1 = tl.execSync('az', script1);
@@ -183,13 +183,13 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
   });
 }
 
-function run(connection) {
+function run() {
   try {
     let deploymentJson = JSON.parse(fs.readFileSync(constants.fileNameDeployTemplateJson));
-
-    let moduleJsons = util.findFiles(`**/${constants.fileNameModuleJson}`, tl);
     // Error handling: validate deployment.json
     util.validateDeployTemplateJson(deploymentJson);
+
+    let moduleJsons = util.findFiles(`**/${constants.fileNameModuleJson}`, tl);
 
     for (let systemModule of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'])) {
       let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;

@@ -59,7 +59,7 @@ if (action === 'Build') {
     });
 } else if (action === 'Deploy to Edge device') {
   console.log('Start deploying image');
-  deployImage.run(connection)
+  deployImage.run()
     .then(() => {
       console.log('Finished Deploying image');
       tl.setResult(tl.TaskResult.Succeeded, "");

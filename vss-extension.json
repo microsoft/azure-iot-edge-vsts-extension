@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "iot-edge-build-deploy",
   "name": "IoT Edge Build and Deploy",
-  "version": "0.0.126",
+  "version": "0.0.127",
   "publisher": "michaeljqzq",
   "targets": [
     {

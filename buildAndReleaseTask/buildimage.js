@@ -70,7 +70,6 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
 }
 
 function run(connection) {
-  // get all modules
   try {
     let inputs = tl.getDelimitedInput("moduleJsons", "\n");
     // Error handling: Remind for empty set
