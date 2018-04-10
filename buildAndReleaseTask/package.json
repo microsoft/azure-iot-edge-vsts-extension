@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "docker-common": "file:docker-common-1.0.0.tgz",
+    "docker-common": "file:./node_modules/docker-common-1.0.0.tgz",
     "request": "^2.83.0",
     "vsts-task-lib": "^2.3.0"
   },
