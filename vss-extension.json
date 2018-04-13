@@ -48,5 +48,6 @@
       }
     }
   ],
-  "scopes": []
+  "scopes": [],
+  "public": true
 }
