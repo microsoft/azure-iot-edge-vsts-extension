@@ -1,6 +1,11 @@
 const appInsights = require('applicationinsights');
+const metadata = {
+  id: 'iot-edge-build-deploy',
+  version: '0.1.3',
+  publisher: 'vsc-iot',
+}
 
-const instrumentKey = '68ce9f27-d90a-4dad-b029-e9134266822c';
+const instrumentKey = 'fed7fc65-5b4a-4e66-9d46-c5f016d4e2b4';
 
 appInsights.setup(instrumentKey);
 let client = appInsights.defaultClient;
@@ -8,9 +13,13 @@ let client = appInsights.defaultClient;
 function traceEvent(name, property, metric) {
   // Zhiqing change default behavior or it will a minute to send retry request before the process exit
   // Patched the applicationinsights.js
+  let properties = Object.assign({}, property, {
+    'common.extname': `${metadata.publisher}.${metadata.id}`,
+    'common.extversion': metadata.version,
+  });
   client.trackEvent({
-    name: name,
-    properties: property
+    name: `${metadata.publisher}.${metadata.id}/${name}`,
+    properties,
   });
   client.flush();
 }
