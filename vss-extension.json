@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "id": "iot-edge-build-deploy",
   "name": "IoT Edge Build and Deploy",
-  "version": "0.0.137",
-  "publisher": "michaeljqzq",
+  "version": "0.1.0",
+  "publisher": "vsc-iot",
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"

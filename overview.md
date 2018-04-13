@@ -28,7 +28,4 @@ Deploy task will create a [deployment job](https://docs.microsoft.com/en-us/azur
 In deploy task, you need to choose the Azure Subscription that contains your IoT Hub, and then input the IoT Hub name, deployment ID, deployment priority. There're 2 ways to deploy the Edge devices: `Single Device` or `Multiple Devices`. For single device, you need to specify the device ID. For multiple devices, input the target condition of devices you would like to deploy. Do not use double quote. Example: tags.building=9 and tags.environment='test'.
 
 ## Contact Information
-For further information or to resolve issues, contact //TODO.
-
-## Change Log
-You can view the change log here //TODO.
+For further information or to resolve issues, contact vsciot@microsoft.com.
