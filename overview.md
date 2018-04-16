@@ -1,4 +1,4 @@
-# IoT Edge Build and Deploy
+# Azure IoT Edge For VSTS
 IoT Edge Build and Deploy is a tool for continuous integration(build and push docker image) and continuous deployment(create Edge deployment on Azure) for Azure IoT Edge modules project.
 
 ## Requirement

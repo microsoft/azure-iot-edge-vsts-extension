@@ -1,7 +1,7 @@
 const appInsights = require('applicationinsights');
 const metadata = {
   id: 'iot-edge-build-deploy',
-  version: '0.1.3',
+  version: '0.1.4',
   publisher: 'vsc-iot',
 }
 
