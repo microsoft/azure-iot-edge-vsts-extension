@@ -49,7 +49,7 @@ let telemetryEvent = {
 
 let startTime = new Date();
 
-if (action === 'Build') {
+if (action === 'Build modules') {
   console.log('Building image...');
   buildImage.run(connection)
     .then(() => {
@@ -65,7 +65,7 @@ if (action === 'Build') {
       trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Failed, err);
     });
-} else if (action === 'Build and Push') {
+} else if (action === 'Build and Push modules') {
   console.log('Building image...');
   telemetryEvent.isACR = registryType === "Azure Container Registry";
   buildImage.run(connection)
@@ -88,7 +88,7 @@ if (action === 'Build') {
       trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Failed, err);
     });
-} else if (action === 'Deploy to Edge device') {
+} else if (action === 'Deploy to IoT Edge devices') {
   console.log('Start deploying image');
   telemetryEvent.hashIoTHub = sha256(tl.getInput("iothubname", true));
   deployImage.run()

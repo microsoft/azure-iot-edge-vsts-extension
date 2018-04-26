@@ -1,8 +1,8 @@
 {
   "id": "80F3F6A0-82A6-4A22-BA7A-E5B8C541B9B8",
   "name": "edge-cicd-task",
-  "friendlyName": "IoT Edge CI/CD",
-  "description": "IoT Edge CI/CD",
+  "friendlyName": "Azure IoT Edge",
+  "description": "Azure IoT Edge",
   "helpMarkDown": "",
   "category": "Build",
   "visibility": [
@@ -15,7 +15,7 @@
     "Minor": 1,
     "Patch": 0
   },
-  "instanceNameFormat": "Edge $(action)",
+  "instanceNameFormat": "Azure IoT Edge - $(action)",
   "groups": [
     {
       "name": "advanced",
@@ -28,12 +28,12 @@
       "name": "action",
       "type": "pickList",
       "label": "Action",
-      "defaultValue": "Build",
+      "defaultValue": "Build and Push modules",
       "required": true,
       "options": {
-        "Build": "Build",
-        "Build and Push": "Build and Push",
-        "Deploy to Edge device": "Deploy to Edge device"
+        "Build modules": "Build modules",
+        "Build and Push modules": "Build and Push modules",
+        "Deploy to IoT Edge devices": "Deploy to IoT Edge devices"
       },
       "helpMarkDown": "Select an Edge action."
     },
@@ -45,7 +45,7 @@
       "type": "connectedService:AzureRM",
       "label": "Azure subscription contains IoT Hub",
       "required": true,
-      "visibleRule": "action == Deploy to Edge device",
+      "visibleRule": "action == Deploy to IoT Edge devices",
       "helpMarkDown": "Select an Azure subscription that contains IoT Hub"
     },
     {
@@ -53,7 +53,7 @@
       "type": "string",
       "label": "IoT Hub name",
       "required": true,
-      "visibleRule": "action == Deploy to Edge device",
+      "visibleRule": "action == Deploy to IoT Edge devices",
       "helpMarkDown": "Input the IoT Hub Name"
     },
     {
@@ -62,8 +62,8 @@
       "label": "IoT Edge Deployment ID",
       "required": true,
       "defaultValue": "vsts-deployment",
-      "visibleRule": "action == Deploy to Edge device",
-      "helpMarkDown": "Input the IoT Edge Deployment ID, if ID exists, it will be overridden"
+      "visibleRule": "action == Deploy to IoT Edge devices",
+      "helpMarkDown": "Input the IoT Edge Deployment ID, if ID exists, it will be overridden. For more information: https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment"
     },
     {
       "name": "priority",
@@ -71,8 +71,8 @@
       "label": "IoT Edge Deployment priority",
       "required": true,
       "defaultValue": "0",
-      "visibleRule": "action == Deploy to Edge device",
-      "helpMarkDown": "Set the priority to a positive integer to resolve deployment conflicts: when targeted by multiple deployments a device will use the one with highest priority or (in case of two deployments with the same priority) latest creation time."
+      "visibleRule": "action == Deploy to IoT Edge devices",
+      "helpMarkDown": "Set the priority to a positive integer to resolve deployment conflicts: when targeted by multiple deployments a device will use the one with highest priority or (in case of two deployments with the same priority) latest creation time. For more information: https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment"
     },
     {
       "name": "deviceOption",
@@ -84,30 +84,30 @@
         "Multiple Devices": "Multiple Devices"
       },
       "helpMarkDown": "Choose to deploy to single or multiple(by tags) devices",
-      "visibleRule": "action == Deploy to Edge device"
+      "visibleRule": "action == Deploy to IoT Edge devices"
     },
     {
       "name": "deviceId",
       "type": "string",
-      "label": "Edge device ID",
+      "label": "IoT Edge device ID",
       "required": true,
       "visibleRule": "deviceOption == Single Device",
-      "helpMarkDown": "Input the Edge device ID"
+      "helpMarkDown": "Input the IoT Edge device ID"
     },
     {
       "name": "targetcondition",
       "type": "string",
-      "label": "Edge device Target Condition",
+      "label": "IoT Edge device Target Condition",
       "required": true,
       "visibleRule": "deviceOption == Multiple Devices",
-      "helpMarkDown": "Input the target condition of devices you would like to deploy. Do not use double quote. Example: tags.building=9 and tags.environment='test'"
+      "helpMarkDown": "Input the target condition of devices you would like to deploy. Do not use double quote. Example: tags.building=9 and tags.environment='test'. For more information: https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment"
     },
     {
       "name": "moduleJsons",
       "type": "multiline",
       "label": "Module.json File",
       "defaultValue": "**/module.json",
-      "visibleRule": "action = Build || action = Build and Push",
+      "visibleRule": "action = Build modules || action = Build and Push modules",
       "required": true,
       "helpMarkDown": "Path to the modules you would like to build. You can specify multiple files, each take one line. Reference for wildcard: https://docs.microsoft.com/en-us/vsts/build-release/tasks/file-matching-patterns?view=vsts"
     },
@@ -117,7 +117,7 @@
       "label": "Container Registry Type",
       "defaultValue": "Azure Container Registry",
       "required": true,
-      "visibleRule": "action = Build and Push",
+      "visibleRule": "action = Build and Push modules",
       "options": {
         "Azure Container Registry": "Azure Container Registry",
         "Container Registry": "Container Registry"
