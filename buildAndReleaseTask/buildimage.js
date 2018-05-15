@@ -22,7 +22,7 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
 
   if (!deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
     console.log(`Module ${moduleName} is not specified in deployment.json, skip`);
-    return Promise.resolve();
+    return null;
   }
   let imageName = deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
   let m = imageName.match(/\$\{MODULES\..*\.(.*)\}$/i);
@@ -92,8 +92,12 @@ function run(connection) {
     let promises = [];
     
     for (let moduleJson of moduleJsons) {
-      promises.push(build(connection, moduleJson, deploymentJson));
+      let p = build(connection, moduleJson, deploymentJson);
+      if (p != null) {
+        promises.push(p);
+      }
     }
+    console.log(`Number of modules to build: ${promises.length}`);
     return Promise.all(promises);
   } catch (e) {
     return Promise.reject(e);

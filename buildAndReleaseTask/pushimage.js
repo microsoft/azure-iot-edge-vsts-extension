@@ -97,6 +97,11 @@ function run(connection, imageNames) {
     let useMultiImageMode = false;
   
     let imageMappings = getImageMappings(connection, imageNames);
+    console.log(`Number of modules to push: ${imageMappings.length}`);
+
+    if(imageMappings.length === 0) {
+      return Promise.resolve();
+    }
   
     let imageDigestFile = null;
   

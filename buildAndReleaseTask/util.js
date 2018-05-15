@@ -69,7 +69,7 @@ class Util {
       var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, { matchBase: true });
   
       if (!matchingResultsFiles || matchingResultsFiles.length == 0) {
-        throw new Error(tl.loc('ContainerDockerFileNotFound', filepath));
+        console.log(`No Docker file matching ${filepath} was found.`);
       }
   
       return matchingResultsFiles;
