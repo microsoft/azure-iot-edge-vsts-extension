@@ -1,0 +1,2 @@
+tfx extension create --manifest-globs vss-extension.json --overrides-file ./build-test-config.json
+tfx extension publish --manifest-globs vss-extension.json --overrides-file ./build-test-config.json --share-with zhqqitest
