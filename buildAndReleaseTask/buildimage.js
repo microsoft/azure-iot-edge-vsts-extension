@@ -6,8 +6,9 @@ const sourceUtils = require('docker-common/sourceutils');
 const imageUtils = require('docker-common/containerimageutils');
 const constants = require('./constant');
 const util = require('./util');
+const serviceEndpointsHandler = require('./serviceEndpointHandler');
 
-function build(connection, moduleJsonPath, deploymentJsonObject) {
+function build(connection, moduleJsonPath, deploymentJsonObject, serviceEndpoints) {
   var command = connection.createCommand();
   command.arg("build");
 
@@ -64,6 +65,13 @@ function build(connection, moduleJsonPath, deploymentJsonObject) {
     command.arg(["-m", memory]);
   }
 
+  try {
+    let handler = new serviceEndpointsHandler(dockerFile);
+    handler.resolve(serviceEndpoints);
+  }catch(e) {
+    console.log(`Error happens when handling service endpoints: ${e.message}`);
+  }
+
   let context = path.dirname(dockerFile);
   command.arg(context);
   return connection.execCommand(command).then(() => imageName);
@@ -89,10 +97,12 @@ function run(connection) {
     // Error handling: validate deployment.json, will catch the error if property not exist
     util.validateDeployTemplateJson(deploymentJson);
 
+    let serviceEndpoints = util.getServiceEndpoints(tl);
+
     let promises = [];
     
     for (let moduleJson of moduleJsons) {
-      let p = build(connection, moduleJson, deploymentJson);
+      let p = build(connection, moduleJson, deploymentJson, serviceEndpoints);
       if (p != null) {
         promises.push(p);
       }

@@ -125,6 +125,13 @@
       "helpMarkDown": "Select a Container Registry Type."
     },
     {
+      "name": "nugetFeed",
+      "type": "connectedService:externalnugetfeed",
+      "label": "NuGet Feed",
+      "helpMarkDown": "If you have NuGet dependency for private package sources, choose/add a service endpoint",
+      "groupName": "advanced"
+    },
+    {
       "name": "dockerRegistryEndpoint",
       "aliases": [
         "dockerRegistryConnection"

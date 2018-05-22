@@ -79,6 +79,20 @@ class Util {
       return [filepath];
     }
   }
+
+  static getServiceEndpoints(tl) {
+    let result = {};
+    let endpoints = constants.serviceEndpoints;
+    for(let k of Object.keys(endpoints)) {
+      if(endpoints[k].inputName && tl.getInput(endpoints[k].inputName)) {
+        result[k] = {
+          url: tl.getEndpointUrl(tl.getInput(endpoints[k].inputName), true),
+          authorization: tl.getEndpointAuthorization(tl.getInput(endpoints[k].inputName), true).parameters
+        }
+      }
+    }
+    return result;
+  }
 }
 
 module.exports = Util;
