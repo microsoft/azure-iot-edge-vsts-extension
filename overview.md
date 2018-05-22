@@ -10,7 +10,21 @@ IoT Edge Build and Deploy is a tool for continuous integration(build and push do
 Please refer to this document for detailed guide.
 [Continuous integration and continuous deployment to Azure IoT Edge - preview](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd)
 
+### Customize NuGet Feed
+If your edge module have dependency for NuGet package in NuGet Feed other than nuget.org, you can add your feed in build definition.
+
+In your build definitions -> Advanced tab, there’s a setting item `NuGet Feed`.
+
+![setting in build definition](./images/docs-1.png)
+
+You can either choose or add one nuget endpoint. Please notice that if you use Personal Access Token in VSTS/TFS nuget package manager, your feed url should end with “/nuget/v2”, nuget v3 is not working with PAT. [Related documentation](https://docs.microsoft.com/en-us/vsts/package/nuget/nuget-exe?view=vsts#add-a-feed-to-nuget-2)
+
+![setting add NuGet endpoint](./images/docs-2.png)
+
 ## Changelog
+### 0.1.7
++ Add support for customization of NuGet Feed
+
 ### 0.1.6
 + Set the result of build task as success(instead of fail) when no modules are built or push
 + When modules in deployment.template.json conflict with those in modules folder, will log the message and set task result to success
