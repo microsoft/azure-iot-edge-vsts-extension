@@ -15,7 +15,8 @@ function build(connection, moduleJsonPath, deploymentJsonObject, serviceEndpoint
   if (!fs.existsSync(moduleJsonPath)) {
     throw new Error('module.json not found');
   }
-  let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
+
+  let moduleJson = JSON.parse(util.expandEnv(fs.readFileSync(moduleJsonPath, "utf-8"), "$schema"));
   // Error handling: validate module.json
   util.validateModuleJson(moduleJson);
 
