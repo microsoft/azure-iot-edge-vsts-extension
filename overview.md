@@ -10,6 +10,37 @@ IoT Edge Build and Deploy is a tool for continuous integration(build and push do
 Please refer to this document for detailed guide.
 [Continuous integration and continuous deployment to Azure IoT Edge - preview](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd)
 
+### Use variables in deployment.template.json / module.json
+You can write environment variables in the json file. In the form of `${ENV}` or `$ENV`.  
+  
+Example
+```json
+"tag": {
+    "version": "0.0.1-${MY_BRANCH}",
+    "platforms": {
+        "amd64": "./Dockerfile",
+        "amd64.debug": "./Dockerfile.amd64.debug",
+        "arm32v7": "./Dockerfile.arm32v7",
+        "windows-amd64": "./Dockerfile"
+    }
+}
+```
+
+Then you can set user-defined variables in VSTS bulld definition.
+
+![variable setting in build definition](https://raw.githubusercontent.com/michaeljqzq/host-image/master/docs-3.png)
+
+Please notice that the key of env will be automatically transformed to capitalized letter in build process. So `my_branch` here will actually be `MY_BRANCH` in build context.
+
+And besides the user-defined environment variables, you can also use the pre-defined variables in VSTS. For example,
+
+* BUILD_BUILDID for build number
+*	BUILD_DEFINITIONNAME for build definition name
+*	BUILD_SOURCEBRANCHNAME for source branch
+*	…
+
+Here’s some [reference](https://docs.microsoft.com/en-us/vsts/pipelines/build/variables?view=vsts&tabs=batch#qa) about the predefined environment variables in VSTS:
+
 ### Customize NuGet Feed
 If your edge module have dependency for NuGet package in NuGet Feed other than nuget.org, you can add your feed in build definition.
 
