@@ -201,15 +201,12 @@ function run() {
       deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
     }
 
-    // Expand environment variables
-    deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
-
     for (let moduleJsonPath of moduleJsons) {
       // error handling
       if (!fs.existsSync(moduleJsonPath)) {
         throw new Error('module.json not found');
       }
-      let moduleJson = JSON.parse(fs.readFileSync(moduleJsonPath));
+      let moduleJson = JSON.parse(util.expandEnv(fs.readFileSync(moduleJsonPath, 'utf-8'), "$schema"));
       // Error handling: validate module.json
       util.validateModuleJson(moduleJson);
 
@@ -233,6 +230,9 @@ function run() {
       imageName = (`${repository}:${version}-${platform}`).toLowerCase();
       deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
     }
+
+    // Expand environment variables
+    deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
 
     if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
       throw new Error('Azure SDK not found');
