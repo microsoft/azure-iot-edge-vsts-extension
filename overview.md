@@ -15,11 +15,11 @@ If your edge module have dependency for NuGet package in NuGet Feed other than n
 
 In your build definitions -> Advanced tab, there’s a setting item `NuGet Feed`.
 
-![setting in build definition](./images/docs-1.png)
+![setting in build definition](https://raw.githubusercontent.com/michaeljqzq/host-image/master/docs-1.png)
 
 You can either choose or add one nuget endpoint. Please notice that if you use Personal Access Token in VSTS/TFS nuget package manager, your feed url should end with “/nuget/v2”, nuget v3 is not working with PAT. [Related documentation](https://docs.microsoft.com/en-us/vsts/package/nuget/nuget-exe?view=vsts#add-a-feed-to-nuget-2)
 
-![setting add NuGet endpoint](./images/docs-2.png)
+![setting add NuGet endpoint](https://raw.githubusercontent.com/michaeljqzq/host-image/master/docs-2.png)
 
 ## Changelog
 ### 0.1.7
