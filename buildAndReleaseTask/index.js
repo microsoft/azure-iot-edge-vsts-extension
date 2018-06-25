@@ -12,6 +12,8 @@ const trackEvent = require('./telemetry');
 
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
+const VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL = "VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL";
+
 // Change to any specified working directory
 tl.cd(tl.getInput("cwd"));
 
@@ -31,6 +33,17 @@ else {
 }
 
 var registryAuthenticationToken = authenticationProvider.getAuthenticationToken();
+
+let creVar = tl.getVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL);
+let credentials = creVar ? JSON.parse(creVar) : [];
+if (registryAuthenticationToken) {
+  credentials.push({
+    username: registryAuthenticationToken.getUsername(),
+    password: registryAuthenticationToken.getPassword(),
+    address: registryAuthenticationToken.getLoginServerUrl()
+  });
+}
+tl.setVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials));
 
 // Connect to any specified container host and/or registry 
 var connection = new ContainerConnection();
@@ -91,7 +104,7 @@ if (action === 'Build modules') {
 } else if (action === 'Deploy to IoT Edge devices') {
   console.log('Start deploying image');
   telemetryEvent.hashIoTHub = sha256(tl.getInput("iothubname", true));
-  deployImage.run()
+  deployImage.run(credentials)
     .then(() => {
       console.log('Finished Deploying image');
       telemetryEvent.isSuccess = true;

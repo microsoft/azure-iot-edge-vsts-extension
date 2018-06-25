@@ -183,7 +183,7 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
   });
 }
 
-function run() {
+function run(dockerCredentials) {
   try {
     let deploymentJson = JSON.parse(fs.readFileSync(constants.fileNameDeployTemplateJson));
     // Error handling: validate deployment.json
@@ -233,6 +233,17 @@ function run() {
 
     // Expand environment variables
     deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
+
+    // Expand docker credentials
+    if (dockerCredentials != undefined && deploymentJson.moduleContent['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
+      let credentials = deploymentJson.moduleContent['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
+      let index = 0;
+      for(let key of Object.keys(credentials)) {
+        if(credentials[key].username && credentials[key].username.startsWith("$") && index < dockerCredentials.length) {
+          credentials[key] = dockerCredentials[index++];
+        }
+      }
+    }
 
     if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
       throw new Error('Azure SDK not found');
