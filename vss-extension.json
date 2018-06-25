@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "iot-edge-build-deploy",
   "name": "Azure IoT Edge For VSTS",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "publisher": "vsc-iot",
   "targets": [
     {

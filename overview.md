@@ -53,6 +53,12 @@ You can either choose or add one nuget endpoint. Please notice that if you use P
 ![setting add NuGet endpoint](https://raw.githubusercontent.com/michaeljqzq/host-image/master/docs-2.png)
 
 ## Changelog
+### 0.1.9
++ Automatically fill the docker credentials in all build processes in deployment manifest
+
+### 0.1.8
++ Add support for environment variable expand
+
 ### 0.1.7
 + Add support for customization of NuGet Feed
 
