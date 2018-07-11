@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "iot-edge-build-deploy",
   "name": "Azure IoT Edge For VSTS",
-  "version": "0.1.9",
+  "version": "1.0.0",
   "publisher": "vsc-iot",
   "targets": [
     {
@@ -22,6 +22,14 @@
   "content": {
     "details": {
       "path": "overview.md"
+    },
+    "changelog": {
+      "path": "CHANGELOG.md"
+    }
+  },
+  "links": {
+    "getstarted": {
+      "uri": "https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd"
     }
   },
   "icons": {
