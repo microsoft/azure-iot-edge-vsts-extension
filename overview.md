@@ -52,20 +52,5 @@ You can either choose or add one nuget endpoint. Please notice that if you use P
 
 ![setting add NuGet endpoint](https://raw.githubusercontent.com/michaeljqzq/host-image/master/docs-2.png)
 
-## Changelog
-### 0.1.9
-+ Automatically fill the docker credentials in all build processes in deployment manifest
-
-### 0.1.8
-+ Add support for environment variable expand
-
-### 0.1.7
-+ Add support for customization of NuGet Feed
-
-### 0.1.6
-+ Set the result of build task as success(instead of fail) when no modules are built or push
-+ When modules in deployment.template.json conflict with those in modules folder, will log the message and set task result to success
-+ Update detailed documentation in extension page 
-
 ## Contact Information
 For further information or to resolve issues, contact vsciot@microsoft.com.
