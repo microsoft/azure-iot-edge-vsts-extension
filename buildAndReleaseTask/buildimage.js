@@ -27,7 +27,7 @@ function build(connection, moduleJsonPath, deploymentJsonObject, serviceEndpoint
     return null;
   }
   let imageName = deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
-  let m = imageName.match(/\$\{MODULES\..*\.(.*)\}$/i);
+  let m = imageName.match(new RegExp("\\$\\{MODULES\\."+moduleName+"\\.(.*)\\}$", "i"));
   if (!m || !m[1]) {
     throw new Error(`image name ${imageName} in module ${moduleName} in deployment.json is not in right format`);
   }

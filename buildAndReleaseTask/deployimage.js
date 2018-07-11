@@ -217,12 +217,13 @@ function run(dockerCredentials) {
         continue;
       }
       let imageName = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
-      let m = imageName.match(/\$\{MODULES\..*\.(.*)\}$/i);
-      let platform = m[1];
+      let m = imageName.match(new RegExp("\\$\\{MODULES\\."+moduleName+"\\.(.*)\\}$", "i"));
 
-      if (!platform) {
+      if (!m || !m[1]) {
         throw new Error(`Module ${moduleName} in deployment.json doesn't contain platform`);
       }
+
+      let platform = m[1];
 
       let repository = moduleJson.image.repository;
       let version = moduleJson.image.tag.version;
