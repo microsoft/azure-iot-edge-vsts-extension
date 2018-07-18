@@ -10,6 +10,10 @@ IoT Edge Build and Deploy is a tool for continuous integration(build and push do
 Please refer to this document for detailed guide.
 [Continuous integration and continuous deployment to Azure IoT Edge - preview](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd)
 
+### Specify the root path of Edge solution
+In some cases, the Edge solution is not under the root of the code repository. You can specify path to the root of Edge solution in build definition. Example: If your code repository is an Edge solution, then leave it to default value './'. If your solution is under subfolder 'edge', then set it to 'edge'"
+Please notice that the module.json file path is relative to the root path of solution.
+
 ### Use variables in deployment.template.json / module.json
 You can write environment variables in the json file. In the form of `${ENV}` or `$ENV`.  
   
