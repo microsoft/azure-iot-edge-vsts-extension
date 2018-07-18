@@ -61,6 +61,13 @@ let telemetryEvent = {
 }
 
 let startTime = new Date();
+try {
+  tl.pushd(tl.getInput('rootPath'));
+} catch (e) {
+  console.log(`The Root path ${tl.getInput('rootPath')} does not exist.`);
+  tl.setResult(tl.TaskResult.Failed);
+  return;
+}
 
 if (action === 'Build modules') {
   console.log('Building image...');
