@@ -1,5 +1,9 @@
 ## Changelog
 
+### 1.0.1
++ Add support to specify the root path of Edge solution
++ Add support to add multiple deploy tasks in one job(which can support multiple Edge solutions in one code repository)
+
 ### 1.0.0
 + Fix: Platform contains '.' will cause build failed
 + Add "Get Started" link in extension page
