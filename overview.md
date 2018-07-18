@@ -53,4 +53,4 @@ You can either choose or add one nuget endpoint. Please notice that if you use P
 ![setting add NuGet endpoint](https://raw.githubusercontent.com/michaeljqzq/host-image/master/docs-2.png)
 
 ## Contact Information
-For further information or to resolve issues, contact vsciot@microsoft.com.
+For further information or to resolve issues, contact vsciet@microsoft.com.
