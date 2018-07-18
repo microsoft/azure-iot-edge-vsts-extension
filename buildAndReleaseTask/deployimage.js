@@ -61,6 +61,9 @@ class azureclitask {
           if (r.code === 1) {
             throw new Error(r.stderr);
           }
+        } else if(addResult.stderr.includes('The extension azure-cli-iot-ext already exists')) {
+          // The job contains multiple deploy tasks
+          // do nothing
         } else {
           throw new Error(addResult.stderr);
         }
