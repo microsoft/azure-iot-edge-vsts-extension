@@ -28,11 +28,11 @@ class Util {
 
   static validateDeployTemplateJson(templateJsonObject) {
     // Will throw error if parent property does not exist
-    if(templateJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'] == undefined) {
-      throw new Error(`${constants.fileNameDeployTemplateJson} moduleContent['$edgeAgent']['properties.desired']['modules'] not set`);
+    if(Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['modules'] == undefined) {
+      throw new Error(`${constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['modules'] not set`);
     }
-    if(templateJsonObject.moduleContent['$edgeAgent']['properties.desired']['systemModules'] == undefined) {
-      throw new Error(`${constants.fileNameDeployTemplateJson} moduleContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
+    if(Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['systemModules'] == undefined) {
+      throw new Error(`${constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
     }
   }
 
@@ -92,6 +92,16 @@ class Util {
       }
     }
     return result;
+  }
+
+  static getModulesContent(templateObject) {
+    if(templateObject.modulesContent != undefined) {
+      return templateObject.modulesContent;
+    }
+    if(templateObject.moduleContent != undefined) {
+      return templateObject.moduleContent;
+    }
+    throw Error(`Property moduleContent or modulesContent can't be found in template`);
   }
 }
 

@@ -194,14 +194,14 @@ function run(dockerCredentials) {
 
     let moduleJsons = util.findFiles(`**/${constants.fileNameModuleJson}`, tl);
 
-    for (let systemModule of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'])) {
-      let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;
-      deploymentJson.moduleContent['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image = originalImage;
+    for (let systemModule of Object.keys(util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['systemModules'])) {
+      let originalImage = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;
+      util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image = originalImage;
     }
 
-    for (let module of Object.keys(deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'])) {
-      let originalImage = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image;
-      deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
+    for (let module of Object.keys(util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'])) {
+      let originalImage = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][module].settings.image;
+      util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
     }
 
     for (let moduleJsonPath of moduleJsons) {
@@ -215,11 +215,11 @@ function run(dockerCredentials) {
 
       let moduleName = path.basename(path.dirname(moduleJsonPath));
 
-      if (!deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
+      if (!util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName]) {
         console.log(`Skip module ${moduleName} since not specified in deployment.json`);
         continue;
       }
-      let imageName = deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
+      let imageName = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
       let m = imageName.match(new RegExp("\\$\\{MODULES\\."+moduleName+"\\.(.*)\\}$", "i"));
 
       if (!m || !m[1]) {
@@ -232,15 +232,15 @@ function run(dockerCredentials) {
       let version = moduleJson.image.tag.version;
 
       imageName = (`${repository}:${version}-${platform}`).toLowerCase();
-      deploymentJson.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
+      util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
     }
 
     // Expand environment variables
     deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
 
     // Expand docker credentials
-    if (dockerCredentials != undefined && deploymentJson.moduleContent['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
-      let credentials = deploymentJson.moduleContent['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
+    if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
+      let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
       let index = 0;
       for(let key of Object.keys(credentials)) {
         if(credentials[key].username && credentials[key].username.startsWith("$") && index < dockerCredentials.length) {

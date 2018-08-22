@@ -22,11 +22,11 @@ function build(connection, moduleJsonPath, deploymentJsonObject, serviceEndpoint
 
   let moduleName = path.basename(path.dirname(moduleJsonPath));
 
-  if (!deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName]) {
+  if (!util.getModulesContent(deploymentJsonObject)['$edgeAgent']['properties.desired']['modules'][moduleName]) {
     console.log(`Module ${moduleName} is not specified in deployment.json, skip`);
     return null;
   }
-  let imageName = deploymentJsonObject.moduleContent['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
+  let imageName = util.getModulesContent(deploymentJsonObject)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
   let m = imageName.match(new RegExp("\\$\\{MODULES\\."+moduleName+"\\.(.*)\\}$", "i"));
   if (!m || !m[1]) {
     throw new Error(`image name ${imageName} in module ${moduleName} in deployment.json is not in right format`);
