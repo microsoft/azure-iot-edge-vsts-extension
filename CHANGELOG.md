@@ -1,5 +1,8 @@
 ## Changelog
 
+### 1.0.2
++ Align with property change in manifest: "modulesContent", keep compatibility with old pattern "moduleContent"
+
 ### 1.0.1
 + Add support to specify the root path of Edge solution
 + Add support to add multiple deploy tasks in one job(which can support multiple Edge solutions in one code repository)
