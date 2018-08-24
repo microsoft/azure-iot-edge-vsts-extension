@@ -1,5 +1,8 @@
 ## Changelog
 
+### 1.0.3
++ Fix: When deploy image, it will search for module.json out of the scope of solution root
+
 ### 1.0.2
 + Align with property change in manifest: "modulesContent", keep compatibility with old pattern "moduleContent"
 
