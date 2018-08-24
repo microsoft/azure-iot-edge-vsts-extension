@@ -64,7 +64,7 @@ class Util {
   static findFiles(filepath, tl) {
     if (filepath.indexOf('*') >= 0 || filepath.indexOf('?') >= 0) {
       tl.debug(tl.loc('ContainerPatternFound'));
-      var buildFolder = tl.getVariable('System.DefaultWorkingDirectory');
+      var buildFolder = tl.cwd();
       var allFiles = tl.find(buildFolder);
       var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, { matchBase: true });
   
