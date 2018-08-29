@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const tl = require('vsts-task-lib/task');
 const ContainerConnection = require('docker-common/containerconnection').default;
 const AuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/authenticationtokenprovider');
@@ -34,7 +35,19 @@ else {
 
 var registryAuthenticationToken = authenticationProvider.getAuthenticationToken();
 
+try {
+  tl.pushd(tl.getInput('rootPath'));
+} catch (e) {
+  console.log(`The Root path ${tl.getInput('rootPath')} does not exist.`);
+  tl.setResult(tl.TaskResult.Failed);
+  return;
+}
+
 let creVar = tl.getVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL);
+if(!creVar && fs.existsSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL)) {
+  creVar = fs.readFileSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, {encoding: 'utf-8'}).toString();
+}
+
 let credentials = creVar ? JSON.parse(creVar) : [];
 if (registryAuthenticationToken) {
   credentials.push({
@@ -44,6 +57,7 @@ if (registryAuthenticationToken) {
   });
 }
 tl.setVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials));
+fs.writeFileSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials), {encoding: 'utf-8'});
 
 // Connect to any specified container host and/or registry 
 var connection = new ContainerConnection();
@@ -61,13 +75,7 @@ let telemetryEvent = {
 }
 
 let startTime = new Date();
-try {
-  tl.pushd(tl.getInput('rootPath'));
-} catch (e) {
-  console.log(`The Root path ${tl.getInput('rootPath')} does not exist.`);
-  tl.setResult(tl.TaskResult.Failed);
-  return;
-}
+
 
 if (action === 'Build modules') {
   console.log('Building image...');
