@@ -1,5 +1,8 @@
 ## Changelog
 
+### 1.0.4
++ Fix: Work around for build agent issue: az command will exit with non-zero code since configuration files are missing.
+
 ### 1.0.3
 + Fix: When deploy image, it will search for module.json out of the scope of solution root
 
