@@ -112,6 +112,8 @@ class azureclitask {
     var servicePrincipalKey = tl.getEndpointAuthorizationParameter(connectedService, "serviceprincipalkey", false);
     var tenantId = tl.getEndpointAuthorizationParameter(connectedService, "tenantid", false);
     var subscriptionName = tl.getEndpointDataParameter(connectedService, "SubscriptionName", true);
+    // Work around for build agent az command will exit with non-zero code since configuration files are missing.
+    tl.execSync("az", "--version");
     //login using svn
     this.throwIfError(tl.execSync("az", "login --service-principal -u \"" + servicePrincipalId + "\" -p \"" + servicePrincipalKey + "\" --tenant \"" + tenantId + "\""));
     this.isLoggedIn = true;
