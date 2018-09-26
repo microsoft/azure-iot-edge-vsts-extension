@@ -8,77 +8,7 @@ const constants = require('./constant');
 const util = require('./util');
 const serviceEndpointsHandler = require('./serviceEndpointHandler');
 
-function build(connection, moduleJsonPath, deploymentJsonObject, serviceEndpoints) {
-  var command = connection.createCommand();
-  command.arg("build");
-
-  if (!fs.existsSync(moduleJsonPath)) {
-    throw new Error('module.json not found');
-  }
-
-  let moduleJson = JSON.parse(util.expandEnv(fs.readFileSync(moduleJsonPath, "utf-8"), "$schema"));
-  // Error handling: validate module.json
-  util.validateModuleJson(moduleJson);
-
-  let moduleName = path.basename(path.dirname(moduleJsonPath));
-
-  if (!util.getModulesContent(deploymentJsonObject)['$edgeAgent']['properties.desired']['modules'][moduleName]) {
-    console.log(`Module ${moduleName} is not specified in deployment.json, skip`);
-    return null;
-  }
-  let imageName = util.getModulesContent(deploymentJsonObject)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
-  let m = imageName.match(new RegExp("\\$\\{MODULES\\."+moduleName+"\\.(.*)\\}$", "i"));
-  if (!m || !m[1]) {
-    throw new Error(`image name ${imageName} in module ${moduleName} in deployment.json is not in right format`);
-  }
-  let platform = m[1];
-
-  let dockerFileRelative = moduleJson.image.tag.platforms[platform];
-  let repository = moduleJson.image.repository;
-  let version = moduleJson.image.tag.version;
-  let dockerFile = path.resolve(path.dirname(moduleJsonPath), dockerFileRelative);
-
-  command.arg(["-f", dockerFile]);
-
-  imageName = (`${repository}:${version}-${platform}`).toLowerCase();
-  command.arg(["-t", imageName]);
-
-  var baseImageName = imageUtils.imageNameWithoutTag(imageName);
-
-  tl.getDelimitedInput("additionalImageTags", "\n").forEach(tag => {
-    command.arg(["-t", baseImageName + ":" + tag]);
-  });
-
-  var includeSourceTags = tl.getBoolInput("includeSourceTags");
-  if (includeSourceTags) {
-    sourceUtils.getSourceTags().forEach(tag => {
-      command.arg(["-t", baseImageName + ":" + tag]);
-    });
-  }
-
-  var includeLatestTag = tl.getBoolInput("includeLatestTag");
-  if (baseImageName !== imageName && includeLatestTag) {
-    command.arg(["-t", baseImageName]);
-  }
-
-  var memory = tl.getInput("memory");
-  if (memory) {
-    command.arg(["-m", memory]);
-  }
-
-  try {
-    let handler = new serviceEndpointsHandler(dockerFile);
-    handler.resolve(serviceEndpoints);
-  }catch(e) {
-    console.log(`Error happens when handling service endpoints: ${e.message}`);
-  }
-
-  let context = path.dirname(dockerFile);
-  command.arg(context);
-  return connection.execCommand(command).then(() => imageName);
-}
-
-function run(connection) {
+function run(registryAuthenticationToken, doPush) {
   try {
     let inputs = tl.getDelimitedInput("moduleJsons", "\n");
     // Error handling: Remind for empty set
@@ -102,14 +32,56 @@ function run(connection) {
 
     let promises = [];
     
+    let selectedModules = [];
+    let modulesFolder = path.resolve(tl.cwd(), constants.folderNameModules);
+    let allModules = fs.readdirSync(modulesFolder).filter(name => fs.lstatSync(path.join(modulesFolder, name)).isDirectory());
+    tl.debug(`all modules:${JSON.stringify(allModules)}`);
+
     for (let moduleJson of moduleJsons) {
-      let p = build(connection, moduleJson, deploymentJson, serviceEndpoints);
-      if (p != null) {
-        promises.push(p);
+      try {
+        JSON.parse(fs.readFileSync(moduleJson, "utf-8"));
+      } catch (e) {
+        // If something error happened in parse JSON, then don't put it in selected modules list.
+        continue;
       }
+      selectedModules.push(path.basename(path.dirname(moduleJson)));
     }
-    console.log(`Number of modules to build: ${promises.length}`);
-    return Promise.all(promises);
+    tl.debug(`selected modules:${JSON.stringify(selectedModules)}`);
+    
+    let bypassModules = allModules.filter(m => !selectedModules.includes(m));
+    tl.debug(`bypass modules:${JSON.stringify(bypassModules)}`);
+
+    console.log(`Number of modules to build: ${selectedModules.length}`);
+
+    util.setupIotedgedev(tl);
+
+    /* 
+     * iotedgedev will use registry server url to match which credential to use in push process
+     * For example, a normal docker hub credential should have server: https://index.docker.io/v1/ I would like to push to michaeljqzq/repo:0.0.1
+     * But if I set CONTAINER_REGISTRY_SERVER=https://index.docker.io/v1/ in environment variable, it won't work.
+     * iotedgedev won't load this credential
+     * instead, the CONTAINER_REGISTRY_SERVER should be set to michaeljqzq
+     * However, "michaeljqzq" is not in the scope of a credential.
+     * So here is a work around to login in advanced call to `iotedgedev push` and then logout after everything done.
+     */
+    tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`)
+
+    return tl.exec(`${constants.iotedgedev}`, doPush ? `push` : `build`, {
+      cwd: tl.cwd(),
+      env: {
+        [constants.iotedgedevEnv.bypassModules]: bypassModules.join(),
+        [constants.iotedgedevEnv.registryServer]: registryAuthenticationToken.getLoginServerUrl(),
+        [constants.iotedgedevEnv.registryUsername]: registryAuthenticationToken.getUsername(),
+        [constants.iotedgedevEnv.registryPassword]: registryAuthenticationToken.getPassword(),
+      }
+    }).then((val)=>{
+      tl.execSync(`docker`, `logout`);
+      return Promise.resolve(val);
+    },(err)=>{
+      tl.execSync(`docker`, `logout`);
+      return Promise.reject(err);
+    });
+
   } catch (e) {
     return Promise.reject(e);
   }

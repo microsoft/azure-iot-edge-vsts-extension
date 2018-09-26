@@ -15,43 +15,43 @@ class Util {
 
   static validateModuleJson(moduleJsonObject) {
     // Will throw error if parent property does not exist
-    if(moduleJsonObject.image.tag.platforms == undefined) {
+    if (moduleJsonObject.image.tag.platforms == undefined) {
       throw new Error(`${constants.fileNameModuleJson} image.tag.platforms not set`);
     }
-    if(moduleJsonObject.image.repository == undefined) {
+    if (moduleJsonObject.image.repository == undefined) {
       throw new Error(`${constants.fileNameModuleJson} image.repository not set`);
     }
-    if(moduleJsonObject.image.tag.version == undefined) {
+    if (moduleJsonObject.image.tag.version == undefined) {
       throw new Error(`${constants.fileNameModuleJson} image.tag.version not set`);
     }
   }
 
   static validateDeployTemplateJson(templateJsonObject) {
     // Will throw error if parent property does not exist
-    if(Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['modules'] == undefined) {
+    if (Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['modules'] == undefined) {
       throw new Error(`${constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['modules'] not set`);
     }
-    if(Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['systemModules'] == undefined) {
+    if (Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['systemModules'] == undefined) {
       throw new Error(`${constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
     }
   }
 
   static generateSasToken(resourceUri, signingKey, policyName, expiresInMins = 3600) {
     resourceUri = encodeURIComponent(resourceUri);
-  
+
     // Set expiration in seconds
     var expires = (Date.now() / 1000) + expiresInMins * 60;
     expires = Math.ceil(expires);
     var toSign = resourceUri + '\n' + expires;
-  
+
     // Use crypto
     var hmac = crypto.createHmac('sha256', new Buffer(signingKey, 'base64'));
     hmac.update(toSign);
     var base64UriEncoded = encodeURIComponent(hmac.digest('base64'));
-  
+
     // Construct autorization string
-    var token = "SharedAccessSignature sr=" + resourceUri + "&sig="
-      + base64UriEncoded + "&se=" + expires;
+    var token = "SharedAccessSignature sr=" + resourceUri + "&sig=" +
+      base64UriEncoded + "&se=" + expires;
     if (policyName) token += "&skn=" + policyName;
     return token;
   }
@@ -66,15 +66,16 @@ class Util {
       tl.debug(tl.loc('ContainerPatternFound'));
       var buildFolder = tl.cwd();
       var allFiles = tl.find(buildFolder);
-      var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, { matchBase: true });
-  
+      var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, {
+        matchBase: true
+      });
+
       if (!matchingResultsFiles || matchingResultsFiles.length == 0) {
         console.log(`No Docker file matching ${filepath} was found.`);
       }
-  
+
       return matchingResultsFiles;
-    }
-    else {
+    } else {
       tl.debug(tl.loc('ContainerPatternNotFound'));
       return [filepath];
     }
@@ -83,8 +84,8 @@ class Util {
   static getServiceEndpoints(tl) {
     let result = {};
     let endpoints = constants.serviceEndpoints;
-    for(let k of Object.keys(endpoints)) {
-      if(endpoints[k].inputName && tl.getInput(endpoints[k].inputName)) {
+    for (let k of Object.keys(endpoints)) {
+      if (endpoints[k].inputName && tl.getInput(endpoints[k].inputName)) {
         result[k] = {
           url: tl.getEndpointUrl(tl.getInput(endpoints[k].inputName), true),
           authorization: tl.getEndpointAuthorization(tl.getInput(endpoints[k].inputName), true).parameters
@@ -95,13 +96,49 @@ class Util {
   }
 
   static getModulesContent(templateObject) {
-    if(templateObject.modulesContent != undefined) {
+    if (templateObject.modulesContent != undefined) {
       return templateObject.modulesContent;
     }
-    if(templateObject.moduleContent != undefined) {
+    if (templateObject.moduleContent != undefined) {
       return templateObject.moduleContent;
     }
     throw Error(`Property moduleContent or modulesContent can't be found in template`);
+  }
+
+  static setupIotedgedev(tl) {
+    try {
+      let result = tl.execSync(`${constants.iotedgedev}`, `--version`, {silent: true});
+      if (result.code === 0) {
+        console.log(`${constants.iotedgedev} already installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
+        return;
+      }
+    } catch(e) {
+      // If exception, it means iotedgedev is not installed. Do nothing.
+    }
+
+    try {
+      let cmds = [
+        [`apt-get`, `update`, {silent: true}],
+        [`apt-get`, `install -y python-setuptools`, {silent: true}],
+        [`pip`, `install ${constants.iotedgedev}`, {silent: true}],
+      ]
+      for (let cmd of cmds) {
+        let result = tl.execSync(cmd[0], cmd[1]);
+        if (result.code !== 0) {
+          tl.debug(result.stderr);
+        }
+      }
+    } catch(e) {
+      // If exception, record error message to debug
+      tl.debug(e);
+    }
+    
+    let result = tl.execSync(`${constants.iotedgedev}`, `--version`, {silent: true});
+    if (result.code === 0) {
+      console.log(`${constants.iotedgedev} installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
+    } else {
+      throw Error(`${constants.iotedgedev} installation failed, see detailed error in debug mode`);
+    }
   }
 }
 

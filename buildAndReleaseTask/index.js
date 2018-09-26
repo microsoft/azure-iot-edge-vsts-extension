@@ -6,7 +6,6 @@ const AuthenticationTokenProvider = require('docker-common/registryauthenticatio
 const ACRAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/acrauthenticationtokenprovider').default;
 const GenericAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/genericauthenticationtokenprovider').default;
 const buildImage = require('./buildimage');
-const pushImage = require('./pushimage');
 const deployImage = require('./deployimage');
 const crypto = require('crypto');
 const trackEvent = require('./telemetry');
@@ -35,6 +34,8 @@ else {
 
 var registryAuthenticationToken = authenticationProvider.getAuthenticationToken();
 
+let startTime = new Date();
+
 try {
   tl.pushd(tl.getInput('rootPath'));
 } catch (e) {
@@ -59,10 +60,6 @@ if (registryAuthenticationToken) {
 tl.setVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials));
 fs.writeFileSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials), {encoding: 'utf-8'});
 
-// Connect to any specified container host and/or registry 
-var connection = new ContainerConnection();
-connection.open(tl.getInput("dockerHostEndpoint"), registryAuthenticationToken);
-
 let action = tl.getInput("action", true);
 
 let telemetryEvent = {
@@ -74,12 +71,9 @@ let telemetryEvent = {
   taskTime: null,
 }
 
-let startTime = new Date();
-
-
 if (action === 'Build modules') {
   console.log('Building image...');
-  buildImage.run(connection)
+  buildImage.run(registryAuthenticationToken, false)
     .then(() => {
       console.log('Finished building image');
       telemetryEvent.isSuccess = true;
@@ -94,17 +88,11 @@ if (action === 'Build modules') {
       tl.setResult(tl.TaskResult.Failed, err);
     });
 } else if (action === 'Build and Push modules') {
-  console.log('Building image...');
+  console.log('Building and pushing image...');
   telemetryEvent.isACR = registryType === "Azure Container Registry";
-  buildImage.run(connection)
-    .then((imageNames) => {
-      console.log('Finished building image');
-      console.log('Pushing image');
-      imageName = imageNames.filter(r => r !== undefined);
-      return pushImage.run(connection, imageNames);
-    })
+  buildImage.run(registryAuthenticationToken, true)
     .then(() => {
-      console.log('Finished pushing image');
+      console.log('Finished building and pushing image');
       telemetryEvent.isSuccess = true;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
       trackEvent(action, telemetryEvent);

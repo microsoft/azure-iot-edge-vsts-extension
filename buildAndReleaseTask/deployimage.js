@@ -190,56 +190,13 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
 
 function run(dockerCredentials) {
   try {
-    let deploymentJson = JSON.parse(fs.readFileSync(constants.fileNameDeployTemplateJson));
-    // Error handling: validate deployment.json
-    util.validateDeployTemplateJson(deploymentJson);
-
-    let moduleJsons = util.findFiles(`**/${constants.fileNameModuleJson}`, tl);
-
-    for (let systemModule of Object.keys(util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['systemModules'])) {
-      let originalImage = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image;
-      util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['systemModules'][systemModule].settings.image = originalImage;
-    }
-
-    for (let module of Object.keys(util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'])) {
-      let originalImage = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][module].settings.image;
-      util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][module].settings.image = originalImage;
-    }
-
-    for (let moduleJsonPath of moduleJsons) {
-      // error handling
-      if (!fs.existsSync(moduleJsonPath)) {
-        throw new Error('module.json not found');
-      }
-      let moduleJson = JSON.parse(util.expandEnv(fs.readFileSync(moduleJsonPath, 'utf-8'), "$schema"));
-      // Error handling: validate module.json
-      util.validateModuleJson(moduleJson);
-
-      let moduleName = path.basename(path.dirname(moduleJsonPath));
-
-      if (!util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName]) {
-        console.log(`Skip module ${moduleName} since not specified in deployment.json`);
-        continue;
-      }
-      let imageName = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
-      let m = imageName.match(new RegExp("\\$\\{MODULES\\."+moduleName+"\\.(.*)\\}$", "i"));
-
-      if (!m || !m[1]) {
-        throw new Error(`Module ${moduleName} in deployment.json doesn't contain platform`);
-      }
-
-      let platform = m[1];
-
-      let repository = moduleJson.image.repository;
-      let version = moduleJson.image.tag.version;
-
-      imageName = (`${repository}:${version}-${platform}`).toLowerCase();
-      util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image = imageName;
-    }
-
-    // Expand environment variables
-    deploymentJson = JSON.parse(util.expandEnv(JSON.stringify(deploymentJson), ...constants.exceptStr));
-
+    util.setupIotedgedev(tl);
+    
+    tl.execSync(`${constants.iotedgedev}`, `genconfig`, {
+      cwd: tl.cwd()
+    });
+    let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDeploymentJson)));
+    
     // Expand docker credentials
     if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
       let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
