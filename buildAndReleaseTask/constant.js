@@ -17,7 +17,10 @@ let constant = {
       inputName: "nugetFeed",
       configFileName: "NuGet.Config",
     }
-  }
+  },
+  osTypeLinux: "Linux",
+  osTypeWindows: "Windows_NT",
+  osTypeMac: "Darwin"
 }
 
 module.exports = constant;

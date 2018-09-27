@@ -116,12 +116,20 @@ class Util {
       // If exception, it means iotedgedev is not installed. Do nothing.
     }
 
-    try {
-      let cmds = [
+    let cmds = null;
+    if(tl.osType() === constants.osTypeLinux) {
+      cmds = [
         [`apt-get`, `update`, {silent: true}],
         [`apt-get`, `install -y python-setuptools`, {silent: true}],
         [`pip`, `install ${constants.iotedgedev}`, {silent: true}],
       ]
+    }else if(tl.osType() === constants.osTypeWindows) {
+      cmds = [
+        [`pip`, `install ${constants.iotedgedev}`, {silent: true}],
+      ]
+    }
+    
+    try {
       for (let cmd of cmds) {
         let result = tl.execSync(cmd[0], cmd[1]);
         if (result.code !== 0) {
