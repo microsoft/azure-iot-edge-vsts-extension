@@ -45,22 +45,6 @@ try {
   return;
 }
 
-let creVar = tl.getVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL);
-if(!creVar && fs.existsSync(path.resolve(constants.folderNameConfig, VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL))) {
-  creVar = fs.readFileSync(path.resolve(constants.folderNameConfig, VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL), {encoding: 'utf-8'}).toString();
-}
-
-let credentials = creVar ? JSON.parse(creVar) : [];
-if (registryAuthenticationToken) {
-  credentials.push({
-    username: registryAuthenticationToken.getUsername(),
-    password: registryAuthenticationToken.getPassword(),
-    address: registryAuthenticationToken.getLoginServerUrl()
-  });
-}
-tl.setVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials));
-fs.writeFileSync(path.resolve(constants.folderNameConfig, VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL), JSON.stringify(credentials), {encoding: 'utf-8'});
-
 let action = tl.getInput("action", true);
 
 let telemetryEvent = {
@@ -108,7 +92,7 @@ if (action === 'Build modules') {
 } else if (action === 'Deploy to IoT Edge devices') {
   console.log('Start deploying image');
   telemetryEvent.hashIoTHub = sha256(tl.getInput("iothubname", true) + constants.iothubSuffix);
-  deployImage.run(credentials)
+  deployImage.run()
     .then(() => {
       console.log('Finished Deploying image');
       telemetryEvent.isSuccess = true;

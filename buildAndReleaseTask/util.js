@@ -1,4 +1,6 @@
 const constants = require('./constant');
+const path = require('path');
+const fs = require('fs');
 
 class Util {
   static expandEnv(input, ...exceptKeys) {
@@ -165,6 +167,51 @@ class Util {
     let bMatch = reg.exec(b);
     if (aMatch == null || bMatch == null) return false;
     return aMatch[1] === bMatch[1];
+  }
+
+  // Check if self(task) is included in a build pipeline
+  static checkSelfInBuildPipeline(tl) {
+    let hostType = tl.getVariable('system.hostType').toLowerCase();
+    // Set to build if the pipeline is a build. For a release, the values are deployment for a Deployment group job and release for an Agent job.
+    return hostType === 'build';
+  }
+
+  static createOrAppendDockerCredentials(tl, registryAuthenticationToken) {
+    let creVar = tl.getVariable(constants.fileNameDockerCredential);
+    if (!creVar && fs.existsSync(path.resolve(constants.folderNameConfig, constants.fileNameDockerCredential))) {
+      creVar = fs.readFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDockerCredential), {
+        encoding: 'utf-8'
+      }).toString();
+    }
+
+    let credentials = creVar ? JSON.parse(creVar) : [];
+    if (registryAuthenticationToken) {
+      credentials.push({
+        username: registryAuthenticationToken.getUsername(),
+        password: registryAuthenticationToken.getPassword(),
+        address: registryAuthenticationToken.getLoginServerUrl()
+      });
+    }
+    tl.setVariable(constants.fileNameDockerCredential, JSON.stringify(credentials));
+    if (!fs.existsSync(path.resolve(constants.folderNameConfig))) {
+      fs.mkdirSync(path.resolve(constants.folderNameConfig));
+    }
+    fs.writeFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDockerCredential), JSON.stringify(credentials), {
+      encoding: 'utf-8'
+    });
+  }
+
+  static readDockerCredentials(tl, inBuildPipeline) {
+    let creVar = tl.getVariable(constants.fileNameDockerCredential);
+    let pathToFind = inBuildPipeline ? constants.folderNameConfig : '.';
+    if (!creVar && fs.existsSync(path.resolve(pathToFind, constants.fileNameDockerCredential))) {
+      creVar = fs.readFileSync(path.resolve(pathToFind, constants.fileNameDockerCredential), {
+        encoding: 'utf-8'
+      }).toString();
+    }
+
+    let credentials = creVar ? JSON.parse(creVar) : [];
+    return credentials;
   }
 }
 

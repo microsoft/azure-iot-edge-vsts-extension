@@ -3,6 +3,7 @@ let constant = {
   fileNameDeployTemplateJson: "deployment.template.json",
   fileNameDeploymentJson: "deployment.json",
   fileNameModuleJson: "module.json",
+  fileNameDockerCredential: "VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL",
   folderNameModules: "modules",
   folderNameConfig: "config",
   iotedgedev: "iotedgedev",

@@ -76,6 +76,7 @@ function run(registryAuthenticationToken, doPush) {
       }
     }).then((val)=>{
       tl.execSync(`docker`, `logout`);
+      util.createOrAppendDockerCredentials(tl, registryAuthenticationToken);
       return Promise.resolve(val);
     },(err)=>{
       tl.execSync(`docker`, `logout`);

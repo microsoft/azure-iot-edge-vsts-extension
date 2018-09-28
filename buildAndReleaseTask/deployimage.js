@@ -188,14 +188,22 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
   });
 }
 
-function run(dockerCredentials) {
+function run() {
   try {
-    util.setupIotedgedev(tl);
+    let inBuildPipeline = util.checkSelfInBuildPipeline(tl);
+    let pathToFind = inBuildPipeline ? constants.folderNameConfig : '.';
+
+    if(inBuildPipeline) {
+      util.setupIotedgedev(tl);
+      tl.execSync(`${constants.iotedgedev}`, `genconfig`, {
+        cwd: tl.cwd()
+      });
+    }
     
-    tl.execSync(`${constants.iotedgedev}`, `genconfig`, {
-      cwd: tl.cwd()
-    });
-    let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDeploymentJson)));
+    let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(pathToFind, constants.fileNameDeploymentJson)));
+
+    let dockerCredentials = util.readDockerCredentials(tl, inBuildPipeline);
+    tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
     
     // Expand docker credentials
     // Will replace the registryCredentials if the server match
@@ -203,8 +211,10 @@ function run(dockerCredentials) {
       let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
       for(let key of Object.keys(credentials)) {
         if(credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
+          tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
           for(let dockerCredential of dockerCredentials) {
             if(util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
+              tl.debug(`Found matched cred in file: ${dockerCredential.address}`);
               credentials[key] = dockerCredential;
               break;
             }
