@@ -22,6 +22,7 @@ let constant = {
   osTypeWindows: "Windows_NT",
   osTypeMac: "Darwin",
   iothubSuffix: ".azure-devices.net",
+  defaultDockerHubHostname: "docker.io",
 }
 
 module.exports = constant;

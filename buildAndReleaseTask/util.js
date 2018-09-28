@@ -148,6 +148,24 @@ class Util {
       throw Error(`${constants.iotedgedev} installation failed, see detailed error in debug mode`);
     }
   }
+
+  // test
+  // a b false
+  // docker.io docker.io true
+  // "docker.io","http://index.docker.io/v1" true
+  // "zhiqing.azurecr.io","http://zhiqing.azurecr.io" true
+  // "zhiqing.azurecr.io","https://zhiqing.azurecr.io" true
+  // "zhiqing.azurecr.io","https://zhiqing.azurecr.io/" true
+  static isDockerServerMatch(a, b) {
+    if (a === b) return true;
+    if (a.includes(constants.defaultDockerHubHostname) && b.includes(constants.defaultDockerHubHostname)) return true;
+
+    let reg = new RegExp(/^(?:https?:\/\/)?(.*?)\/?$/);
+    let aMatch = reg.exec(a);
+    let bMatch = reg.exec(b);
+    if (aMatch == null || bMatch == null) return false;
+    return aMatch[1] === bMatch[1];
+  }
 }
 
 module.exports = Util;

@@ -198,12 +198,17 @@ function run(dockerCredentials) {
     let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDeploymentJson)));
     
     // Expand docker credentials
+    // Will replace the registryCredentials if the server match
     if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
       let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
-      let index = 0;
       for(let key of Object.keys(credentials)) {
-        if(credentials[key].username && credentials[key].username.startsWith("$") && index < dockerCredentials.length) {
-          credentials[key] = dockerCredentials[index++];
+        if(credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
+          for(let dockerCredential of dockerCredentials) {
+            if(util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
+              credentials[key] = dockerCredential;
+              break;
+            }
+          }
         }
       }
     }
