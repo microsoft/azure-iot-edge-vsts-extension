@@ -9,6 +9,7 @@ const buildImage = require('./buildimage');
 const deployImage = require('./deployimage');
 const crypto = require('crypto');
 const trackEvent = require('./telemetry');
+const constants = require('./constant');
 
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
@@ -18,7 +19,7 @@ const VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL = "VSTS_EXTENSION_EDGE_DOCKER_CREDEN
 tl.cd(tl.getInput("cwd"));
 
 function sha256(input) {
-  return crypto.createHash('sha256').update(input).digest('base64');
+  return crypto.createHash('sha256').update(input).digest('hex');
 }
 
 // get the registry server authentication provider 
@@ -106,7 +107,7 @@ if (action === 'Build modules') {
     });
 } else if (action === 'Deploy to IoT Edge devices') {
   console.log('Start deploying image');
-  telemetryEvent.hashIoTHub = sha256(tl.getInput("iothubname", true));
+  telemetryEvent.hashIoTHub = sha256(tl.getInput("iothubname", true) + constants.iothubSuffix);
   deployImage.run(credentials)
     .then(() => {
       console.log('Finished Deploying image');

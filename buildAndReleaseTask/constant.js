@@ -20,7 +20,8 @@ let constant = {
   },
   osTypeLinux: "Linux",
   osTypeWindows: "Windows_NT",
-  osTypeMac: "Darwin"
+  osTypeMac: "Darwin",
+  iothubSuffix: ".azure-devices.net",
 }
 
 module.exports = constant;
