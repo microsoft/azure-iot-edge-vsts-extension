@@ -46,8 +46,8 @@ try {
 }
 
 let creVar = tl.getVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL);
-if(!creVar && fs.existsSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL)) {
-  creVar = fs.readFileSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, {encoding: 'utf-8'}).toString();
+if(!creVar && fs.existsSync(path.resolve(constants.folderNameConfig, VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL))) {
+  creVar = fs.readFileSync(path.resolve(constants.folderNameConfig, VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL), {encoding: 'utf-8'}).toString();
 }
 
 let credentials = creVar ? JSON.parse(creVar) : [];
@@ -59,7 +59,7 @@ if (registryAuthenticationToken) {
   });
 }
 tl.setVariable(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials));
-fs.writeFileSync(VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL, JSON.stringify(credentials), {encoding: 'utf-8'});
+fs.writeFileSync(path.resolve(constants.folderNameConfig, VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL), JSON.stringify(credentials), {encoding: 'utf-8'});
 
 let action = tl.getInput("action", true);
 
