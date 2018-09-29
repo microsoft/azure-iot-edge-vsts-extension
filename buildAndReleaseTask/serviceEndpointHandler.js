@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const template = require('./template');
 const constant = require('./constant');
+const tl = require('vsts-task-lib/task');
 
 class serviceEndpointsHandler {
   constructor(dockerFilePath) {
@@ -28,7 +29,7 @@ class serviceEndpointsHandler {
     let templateNuget = template[constant.serviceEndpoints.nuget.configFileName];
     templateNuget = templateNuget.replace('$FEED_URL', authObject.url).replace('$FEED_API_KEY', authObject.authorization.apitoken);
     fs.writeFileSync(path.resolve(path.dirname(dockerFilePath), constant.serviceEndpoints.nuget.configFileName ), templateNuget);
-    console.log(`${constant.serviceEndpoints.nuget.configFileName} created`);
+    tl.debug(`${constant.serviceEndpoints.nuget.configFileName} created`);
 
     // Add "COPY NuGet.Config* ./" before the first line after "FROM" that contains with dotnet
     let dockerFileContent = fs.readFileSync(dockerFilePath, 'utf-8');
