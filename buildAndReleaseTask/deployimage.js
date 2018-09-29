@@ -39,25 +39,26 @@ class azureclitask {
 
       this.loginAzure();
 
-      console.log('OS release:', os.release());
+      tl.debug('OS release:', os.release());
 
       // WORK AROUND
       // In Linux environment, sometimes when install az extension, libffi.so.5 file is missing. Here is a quick fix.
-      let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
+      let addResult = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug', {silent: true});
+      tl.debug(addResult);
       if (addResult.code === 1) {
         if (addResult.stderr.includes('ImportError: libffi.so.5')) {
-          let azRepo = tl.execSync('lsb_release', '-cs').stdout.trim();
+          let azRepo = tl.execSync('lsb_release', '-cs', {silent: true}).stdout.trim();
           console.log(`\n--------------------Error--------------------.\n Something wrong with built-in Azure CLI in agent, can't install az-cli-iot-ext.\nTry to fix with reinstall the ${azRepo} version of Azure CLI.\n\n`);
-          console.log(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list'));
-          fs.writeFileSync('/etc/apt/sources.list.d/azure-cli.list', `deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`);
-          console.log(tl.execSync('cat', '/etc/apt/sources.list.d/azure-cli.list'));
-          console.log(tl.execSync('apt-key', 'adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893'));
-          console.log(tl.execSync('apt-get', 'install apt-transport-https'));
-          console.log(tl.execSync('apt-get', 'update'));
-          console.log(tl.execSync('apt-get', '--assume-yes remove azure-cli'));
-          console.log(tl.execSync('apt-get', '--assume-yes install azure-cli'));
-          let r = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug');
-          console.log(r);
+          tl.debug(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list', {silent: true}));
+          fs.writeFileSync('/etc/apt/sources.list.d/azure-cli.list', `deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`, {silent: true});
+          tl.debug(tl.execSync('cat', '/etc/apt/sources.list.d/azure-cli.list', {silent: true}));
+          tl.debug(tl.execSync('apt-key', 'adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893', {silent: true}));
+          tl.debug(tl.execSync('apt-get', 'install apt-transport-https', {silent: true}));
+          tl.debug(tl.execSync('apt-get', 'update', {silent: true}));
+          tl.debug(tl.execSync('apt-get', '--assume-yes remove azure-cli', {silent: true}));
+          tl.debug(tl.execSync('apt-get', '--assume-yes install azure-cli', {silent: true}));
+          let r = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug', {silent: true});
+          tl.debug(r);
           if (r.code === 1) {
             throw new Error(r.stderr);
           }
@@ -113,17 +114,21 @@ class azureclitask {
     var tenantId = tl.getEndpointAuthorizationParameter(connectedService, "tenantid", false);
     var subscriptionName = tl.getEndpointDataParameter(connectedService, "SubscriptionName", true);
     // Work around for build agent az command will exit with non-zero code since configuration files are missing.
-    tl.execSync("az", "--version");
+    tl.debug(tl.execSync("az", "--version", {silent: true}));
     //login using svn
-    this.throwIfError(tl.execSync("az", "login --service-principal -u \"" + servicePrincipalId + "\" -p \"" + servicePrincipalKey + "\" --tenant \"" + tenantId + "\""));
+    let result = tl.execSync("az", "login --service-principal -u \"" + servicePrincipalId + "\" -p \"" + servicePrincipalKey + "\" --tenant \"" + tenantId + "\"", {silent: true});
+    tl.debug(JSON.stringify(result));
+    this.throwIfError(result);
     this.isLoggedIn = true;
     //set the subscription imported to the current subscription
-    this.throwIfError(tl.execSync("az", "account set --subscription \"" + subscriptionName + "\""));
+    result = tl.execSync("az", "account set --subscription \"" + subscriptionName + "\"", {silent: true});
+    tl.debug(JSON.stringify(result));
+    this.throwIfError(result);
   }
 
   static logoutAzure() {
     try {
-      tl.execSync("az", " account clear");
+      tl.debug(tl.execSync("az", " account clear", {silent: true}));
     }
     catch (err) {
       // task should not fail if logout doesn`t occur

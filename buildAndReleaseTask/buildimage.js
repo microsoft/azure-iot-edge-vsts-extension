@@ -64,7 +64,7 @@ function run(registryAuthenticationToken, doPush) {
      * However, "michaeljqzq" is not in the scope of a credential.
      * So here is a work around to login in advanced call to `iotedgedev push` and then logout after everything done.
      */
-    tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`)
+    tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`, {silent: true})
 
     return tl.exec(`${constants.iotedgedev}`, doPush ? `push` : `build`, {
       cwd: tl.cwd(),
@@ -75,11 +75,11 @@ function run(registryAuthenticationToken, doPush) {
         [constants.iotedgedevEnv.registryPassword]: registryAuthenticationToken.getPassword(),
       }
     }).then((val)=>{
-      tl.execSync(`docker`, `logout`);
+      tl.execSync(`docker`, `logout`, {silent: true});
       util.createOrAppendDockerCredentials(tl, registryAuthenticationToken);
       return Promise.resolve(val);
     },(err)=>{
-      tl.execSync(`docker`, `logout`);
+      tl.execSync(`docker`, `logout`, {silent: true});
       return Promise.reject(err);
     });
 

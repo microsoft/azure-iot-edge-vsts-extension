@@ -133,7 +133,7 @@ class Util {
     
     try {
       for (let cmd of cmds) {
-        let result = tl.execSync(cmd[0], cmd[1]);
+        let result = tl.execSync(cmd[0], cmd[1], cmd[2]);
         if (result.code !== 0) {
           tl.debug(result.stderr);
         }
