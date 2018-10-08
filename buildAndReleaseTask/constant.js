@@ -22,7 +22,6 @@ let constant = {
   osTypeLinux: "Linux",
   osTypeWindows: "Windows_NT",
   osTypeMac: "Darwin",
-  iothubSuffix: ".azure-devices.net",
   defaultDockerHubHostname: "docker.io",
 }
 

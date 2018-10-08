@@ -1,6 +1,7 @@
 const constants = require('./constant');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 class Util {
   static expandEnv(input, ...exceptKeys) {
@@ -212,6 +213,10 @@ class Util {
 
     let credentials = creVar ? JSON.parse(creVar) : [];
     return credentials;
+  }
+
+  static sha256(input) {
+    return crypto.createHash('sha256').update(input).digest('hex');
   }
 }
 

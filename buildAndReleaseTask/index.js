@@ -7,9 +7,9 @@ const ACRAuthenticationTokenProvider = require('docker-common/registryauthentica
 const GenericAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/genericauthenticationtokenprovider').default;
 const buildImage = require('./buildimage');
 const deployImage = require('./deployimage');
-const crypto = require('crypto');
 const trackEvent = require('./telemetry');
 const constants = require('./constant');
+const util = require('./util');
 
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
@@ -17,10 +17,6 @@ const VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL = "VSTS_EXTENSION_EDGE_DOCKER_CREDEN
 
 // Change to any specified working directory
 tl.cd(tl.getInput("cwd"));
-
-function sha256(input) {
-  return crypto.createHash('sha256').update(input).digest('hex');
-}
 
 // get the registry server authentication provider 
 var registryType = tl.getInput("containerregistrytype", true);
@@ -48,7 +44,7 @@ try {
 let action = tl.getInput("action", true);
 
 let telemetryEvent = {
-  hashTeamProjectId: sha256(tl.getVariable('system.teamProjectId')),
+  hashTeamProjectId: util.sha256(tl.getVariable('system.teamProjectId')),
   taskType: action,
   osType: tl.osType(),
   buildId: tl.getVariable('build.buildId'),
@@ -91,8 +87,8 @@ if (action === 'Build modules') {
     });
 } else if (action === 'Deploy to IoT Edge devices') {
   console.log('Start deploying image');
-  telemetryEvent.hashIoTHub = sha256(tl.getInput("iothubname", true) + constants.iothubSuffix);
-  deployImage.run()
+  telemetryEvent.hashIoTHub = util.sha256(tl.getInput("iothubname", true));
+  deployImage.run(telemetryEvent)
     .then(() => {
       console.log('Finished Deploying image');
       telemetryEvent.isSuccess = true;

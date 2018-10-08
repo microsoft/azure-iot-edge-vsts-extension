@@ -12,7 +12,7 @@ class azureclitask {
     return !!tl.which("az", false);
   }
 
-  static runMain(deploymentJson) {
+  static runMain(deploymentJson, telemetryEvent) {
     var toolExecutionError = null;
     try {
       let iothub = tl.getInput("iothubname", true);
@@ -68,6 +68,19 @@ class azureclitask {
         } else {
           throw new Error(addResult.stderr);
         }
+      }
+
+      try {
+        let iotHubInfo = JSON.parse(tl.execSync('az', `iot hub show -n ${iothub}`, {silent: true}).stdout);
+        tl.debug(`The host name of iot hub is ${iotHubInfo.properties.hostName}`);
+        telemetryEvent.iotHubHostNameHash = util.sha256(iotHubInfo.properties.hostName);
+        let reg = new RegExp(iothub+"\.(.*)");
+        let m = reg.exec(iotHubInfo.properties.hostName);
+        if(m && m[1]) {
+          telemetryEvent.iotHubDomain = m[1];
+        }
+      }catch(e) {
+        // If error when get iot hub information, ignore.
       }
 
       let result1 = tl.execSync('az', script1);
@@ -193,7 +206,7 @@ function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
   });
 }
 
-function run() {
+function run(telemetryEvent) {
   try {
     let inBuildPipeline = util.checkSelfInBuildPipeline(tl);
     let pathToFind = inBuildPipeline ? constants.folderNameConfig : '.';
@@ -231,7 +244,7 @@ function run() {
     if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
       throw new Error('Azure SDK not found');
     }
-    return azureclitask.runMain(deploymentJson);
+    return azureclitask.runMain(deploymentJson, telemetryEvent);
   }
   catch (e) {
     return Promise.reject(e);
