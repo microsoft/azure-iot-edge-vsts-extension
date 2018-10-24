@@ -211,16 +211,23 @@ function run(telemetryEvent) {
     let inBuildPipeline = util.checkSelfInBuildPipeline(tl);
     let pathToFind = inBuildPipeline ? constants.folderNameConfig : '.';
 
+    if (!inBuildPipeline) {
+      // Find the deployment.json files in all dirs (artifact dirs)
+      let findPaths = util.findFiles(`**/${constants.fileNameDeploymentJson}`, tl);
+      tl.debug(`Found ${findPaths.length} result for deployment.json`);
+      if (!findPaths || findPaths.length === 0) {
+        throw new Error(`Deployment task is in release pipeline, but ${constants.fileNameDeploymentJson} can't be found. Please ensure deployment.json contains in artifacts.`);
+      }
+      pathToFind = path.basename(findPaths[0]);
+      tl.debug(`The path of ${constants.fileNameDeploymentJson} is ${pathToFind}`);
+    }
+
     if(inBuildPipeline && !fs.existsSync(path.resolve(pathToFind, constants.fileNameDeploymentJson))) {
-      tl.debug(`Found deployment task in build pipeline and not found ${path.resolve(pathToFind, constants.fileNameDeploymentJson)}. It should be an error`);
+      console.log(`Found deployment task in build pipeline and not found ${path.resolve(pathToFind, constants.fileNameDeploymentJson)}. It should be an error`);
       util.setupIotedgedev(tl);
       tl.execSync(`${constants.iotedgedev}`, `genconfig`, {
         cwd: tl.cwd()
       });
-    }
-
-    if(!fs.existsSync(path.resolve(pathToFind, constants.fileNameDeploymentJson))) {
-      throw new Error(`${constants.fileNameDeploymentJson} can't be found under ${pathToFind}`);
     }
     
     let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(pathToFind, constants.fileNameDeploymentJson)));
