@@ -13,7 +13,6 @@ const util = require('./util');
 
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
-const VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL = "VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL";
 
 // Change to any specified working directory
 tl.cd(tl.getInput("cwd"));

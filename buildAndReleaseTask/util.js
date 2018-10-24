@@ -179,11 +179,6 @@ class Util {
 
   static createOrAppendDockerCredentials(tl, registryAuthenticationToken) {
     let creVar = tl.getVariable(constants.fileNameDockerCredential);
-    if (!creVar && fs.existsSync(path.resolve(constants.folderNameConfig, constants.fileNameDockerCredential))) {
-      creVar = fs.readFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDockerCredential), {
-        encoding: 'utf-8'
-      }).toString();
-    }
 
     let credentials = creVar ? JSON.parse(creVar) : [];
     if (registryAuthenticationToken) {
@@ -194,22 +189,10 @@ class Util {
       });
     }
     tl.setVariable(constants.fileNameDockerCredential, JSON.stringify(credentials));
-    if (!fs.existsSync(path.resolve(constants.folderNameConfig))) {
-      fs.mkdirSync(path.resolve(constants.folderNameConfig));
-    }
-    fs.writeFileSync(path.resolve(constants.folderNameConfig, constants.fileNameDockerCredential), JSON.stringify(credentials), {
-      encoding: 'utf-8'
-    });
   }
 
   static readDockerCredentials(tl, inBuildPipeline) {
     let creVar = tl.getVariable(constants.fileNameDockerCredential);
-    let pathToFind = inBuildPipeline ? constants.folderNameConfig : '.';
-    if (!creVar && fs.existsSync(path.resolve(pathToFind, constants.fileNameDockerCredential))) {
-      creVar = fs.readFileSync(path.resolve(pathToFind, constants.fileNameDockerCredential), {
-        encoding: 'utf-8'
-      }).toString();
-    }
 
     let credentials = creVar ? JSON.parse(creVar) : [];
     return credentials;
