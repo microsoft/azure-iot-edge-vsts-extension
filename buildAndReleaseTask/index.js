@@ -13,6 +13,7 @@ const util = require('./util');
 
 tl.setResourcePath(path.join(__dirname, 'task.json'));
 
+util.debugOsType(tl);
 
 // Change to any specified working directory
 tl.cd(tl.getInput("cwd"));

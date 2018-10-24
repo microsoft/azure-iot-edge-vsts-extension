@@ -152,6 +152,23 @@ class Util {
     }
   }
 
+  static debugOsType(tl) {
+    let cmd = null;
+    if(tl.osType() === constants.osTypeLinux) {
+      cmd = ['systeminfo', null];
+    }else if(tl.osType() === constants.osTypeWindows) {
+      cmd = [`lsb_release`, `-a`];
+    }
+    if(cmd != null) {
+      try {
+        let result = tl.execSync(...cmd, {silent: true});
+        tl.debug(`OS is ${result.stdout}`);
+      }catch(e) {
+        console.log(`Error happened when fetching os info: ${e.message}`);
+      }
+    }
+  }
+
   // test
   // a b false
   // docker.io docker.io true
