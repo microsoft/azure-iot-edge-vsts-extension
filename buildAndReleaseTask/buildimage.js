@@ -91,14 +91,25 @@ function run(registryAuthenticationToken, doPush) {
      */
     tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`, {silent: true})
 
+    let envList = {
+      [constants.iotedgedevEnv.bypassModules]: bypassModules.join(),
+      [constants.iotedgedevEnv.registryServer]: registryAuthenticationToken.getLoginServerUrl(),
+      [constants.iotedgedevEnv.registryUsername]: registryAuthenticationToken.getUsername(),
+      [constants.iotedgedevEnv.registryPassword]: registryAuthenticationToken.getPassword(),
+    };
+
+    // Pass task variable to sub process
+    let tlVariables = tl.getVariables();
+    for (let v of tlVariables) {
+      if (!envList[v.name]) {
+        envList[v.name] = v.value;
+        console.log(`zhiqing set env ${envList[v.name]} to ${v.value}`)
+      }
+    }
+
     return tl.exec(`${constants.iotedgedev}`, doPush ? `push` : `build`, {
       cwd: tl.cwd(),
-      env: {
-        [constants.iotedgedevEnv.bypassModules]: bypassModules.join(),
-        [constants.iotedgedevEnv.registryServer]: registryAuthenticationToken.getLoginServerUrl(),
-        [constants.iotedgedevEnv.registryUsername]: registryAuthenticationToken.getUsername(),
-        [constants.iotedgedevEnv.registryPassword]: registryAuthenticationToken.getPassword(),
-      }
+      env: envList,
     }).then((val)=>{
       tl.execSync(`docker`, `logout`, {silent: true});
       util.createOrAppendDockerCredentials(tl, registryAuthenticationToken);
