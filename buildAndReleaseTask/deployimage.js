@@ -211,35 +211,19 @@ function run(telemetryEvent) {
     let inBuildPipeline = util.checkSelfInBuildPipeline(tl);
     let pathToFind = inBuildPipeline ? constants.folderNameConfig : '.';
 
-    if(inBuildPipeline) {
+    if(inBuildPipeline && !fs.existsSync(path.resolve(pathToFind, constants.fileNameDeploymentJson))) {
+      tl.debug(`Found deployment task in build pipeline and not found ${path.resolve(pathToFind, constants.fileNameDeploymentJson)}. It should be an error`);
       util.setupIotedgedev(tl);
       tl.execSync(`${constants.iotedgedev}`, `genconfig`, {
         cwd: tl.cwd()
       });
     }
+
+    if(!fs.existsSync(path.resolve(pathToFind, constants.fileNameDeploymentJson))) {
+      throw new Error(`${constants.fileNameDeploymentJson} can't be found under ${pathToFind}`);
+    }
     
     let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(pathToFind, constants.fileNameDeploymentJson)));
-
-    let dockerCredentials = util.readDockerCredentials(tl, inBuildPipeline);
-    tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
-    
-    // Expand docker credentials
-    // Will replace the registryCredentials if the server match
-    if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
-      let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
-      for(let key of Object.keys(credentials)) {
-        if(credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
-          tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
-          for(let dockerCredential of dockerCredentials) {
-            if(util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
-              tl.debug(`Found matched cred in file: ${dockerCredential.address}`);
-              credentials[key] = dockerCredential;
-              break;
-            }
-          }
-        }
-      }
-    }
 
     if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
       throw new Error('Azure SDK not found');

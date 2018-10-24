@@ -102,6 +102,35 @@ function run(registryAuthenticationToken, doPush) {
     }).then((val)=>{
       tl.execSync(`docker`, `logout`, {silent: true});
       util.createOrAppendDockerCredentials(tl, registryAuthenticationToken);
+
+      let dockerCredentials = util.readDockerCredentials(tl, true);
+      tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
+
+      let pathToFind = path.resolve(constants.folderNameConfig);
+      if(!fs.existsSync(path.resolve(pathToFind, constants.fileNameDeploymentJson))) {
+        throw new Error(`${constants.fileNameDeploymentJson} can't be found under ${pathToFind}`);
+      }
+      let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(pathToFind, constants.fileNameDeploymentJson)));
+      // Expand docker credentials
+      // Will replace the registryCredentials if the server match
+      if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
+        let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
+        for(let key of Object.keys(credentials)) {
+          if(credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
+            tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
+            for(let dockerCredential of dockerCredentials) {
+              if(util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
+                tl.debug(`Found matched cred in file: ${dockerCredential.address}`);
+                credentials[key] = dockerCredential;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      fs.writeFileSync(path.resolve(pathToFind, constants.fileNameDeploymentJson), JSON.stringify(deploymentJson, null, 2));
+
       return Promise.resolve(val);
     },(err)=>{
       tl.execSync(`docker`, `logout`, {silent: true});
