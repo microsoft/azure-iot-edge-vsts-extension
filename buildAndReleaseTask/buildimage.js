@@ -103,7 +103,6 @@ function run(registryAuthenticationToken, doPush) {
     for (let v of tlVariables) {
       if (!envList[v.name]) {
         envList[v.name] = v.value;
-        console.log(`zhiqing set env ${envList[v.name]} to ${v.value}`)
       }
     }
 
