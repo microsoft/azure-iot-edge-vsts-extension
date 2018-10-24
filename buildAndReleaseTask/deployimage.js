@@ -218,7 +218,7 @@ function run(telemetryEvent) {
       if (!findPaths || findPaths.length === 0) {
         throw new Error(`Deployment task is in release pipeline, but ${constants.fileNameDeploymentJson} can't be found. Please ensure deployment.json contains in artifacts.`);
       }
-      pathToFind = path.basename(findPaths[0]);
+      pathToFind = path.dirname(findPaths[0]);
       tl.debug(`The path of ${constants.fileNameDeploymentJson} is ${pathToFind}`);
     }
 
