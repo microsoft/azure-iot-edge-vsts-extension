@@ -50,11 +50,11 @@
     },
     {
       "name": "iothubname",
-      "type": "string",
+      "type": "pickList",
       "label": "IoT Hub name",
       "required": true,
       "visibleRule": "action == Deploy to IoT Edge devices",
-      "helpMarkDown": "Input the IoT Hub Name"
+      "helpMarkDown": "Select the IoT Hub Name"
     },
     {
       "name": "deploymentid",
@@ -178,6 +178,12 @@
       "endpointId": "$(azureSubscriptionEndpoint)",
       "dataSourceName": "AzureRMContainerRegistries",
       "resultTemplate": "{\"Value\":\"{\\\"loginServer\\\":\\\"{{{properties.loginServer}}}\\\", \\\"id\\\" : \\\"{{{id}}}\\\"}\",\"DisplayValue\":\"{{{name}}}\"}"
+    },
+    {
+      "target": "iothubname",
+      "endpointId": "$(connectedServiceNameARM)",
+      "endpointUrl": "{{{endpoint.url}}}/subscriptions/{{{endpoint.subscriptionId}}}/providers/Microsoft.Devices/IotHubs?api-version=2018-04-01",
+      "resultSelector": "jsonpath:$.value[*].name"
     }
   ],
   "execution": {
