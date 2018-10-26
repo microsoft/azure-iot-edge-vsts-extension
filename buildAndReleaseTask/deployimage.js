@@ -83,7 +83,7 @@ class azureclitask {
         // If error when get iot hub information, ignore.
       }
 
-      let result1 = tl.execSync('az', script1);
+      let result1 = tl.execSync('az', script1, {silent: true});
       let result2 = tl.execSync('az', script2);
       if(result2.code !== 0) {
         throw new Error(`Error for deployment: ${result2.stderr}`);
