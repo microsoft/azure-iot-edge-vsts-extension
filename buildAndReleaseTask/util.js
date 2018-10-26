@@ -154,9 +154,9 @@ class Util {
 
   static debugOsType(tl) {
     let cmd = null;
-    if(tl.osType() === constants.osTypeLinux) {
+    if(tl.osType() === constants.osTypeWindows) {
       cmd = ['systeminfo', null];
-    }else if(tl.osType() === constants.osTypeWindows) {
+    }else if(tl.osType() === constants.osTypeLinux) {
       cmd = [`lsb_release`, `-a`];
     }
     if(cmd != null) {
