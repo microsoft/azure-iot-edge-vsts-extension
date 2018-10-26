@@ -2,13 +2,13 @@
 IoT Edge Build and Deploy is a tool for continuous integration(build and push docker image) and continuous deployment(create Edge deployment on Azure) for Azure IoT Edge modules project.
 
 ## Requirement
-* The host agent should be Hosted Linux Preview.(Windows-based agents have some problem with docker)
-* Your project should be a solution containing one or more Edge modules(C# or Function module)
-* A deployment.template.json is under the root folder in the solution
+* For amd64 platform, please use hosted agent `Hosted Linux Preview`. For windows-amd64 platform, please use hosted agent `Hosted VS2017`
+* Your project should be a solution containing one or more Edge modules
+* A deployment.template.json is under the Edge solution folder
 
 ## Usage
 Please refer to this document for detailed guide.
-[Continuous integration and continuous deployment to Azure IoT Edge - preview](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd)
+[Continuous integration and continuous deployment to Azure IoT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd)
 
 ### Specify the root path of Edge solution
 In some cases, the Edge solution is not under the root of the code repository. You can specify path to the root of Edge solution in build definition. Example: If your code repository is an Edge solution, then leave it to default value './'. If your solution is under subfolder 'edge', then set it to 'edge'"

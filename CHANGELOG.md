@@ -1,7 +1,13 @@
 ## Changelog
 
+### 1.1.0
++ Integrate with iotedgedev CLI to do docker related work
++ Suppport to use Windows Build Agent(Hosted VS2017) which will use Windows Container to build docker image
++ Support to put deploy task in the release pipeline and use artifact to pass the deployment.json
++ Automatically fill in docker credentials in deployment.json with the corresponding docker credentials set in build pipeline
+
 ### 1.0.4
-+ Fix: Work around for build agent issue: az command will exit with non-zero code since configuration files are missing.
++ Fix: Work around for build agent issue: az command will exit with non-zero code since configuration files are missing
 
 ### 1.0.3
 + Fix: When deploy image, it will search for module.json out of the scope of solution root
