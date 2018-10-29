@@ -122,9 +122,9 @@ class Util {
     let cmds = null;
     if(tl.osType() === constants.osTypeLinux) {
       cmds = [
-        [`apt-get`, `update`, {silent: true}],
-        [`apt-get`, `install -y python-setuptools`, {silent: true}],
-        [`pip`, `install ${constants.iotedgedev}`, {silent: true}],
+        [`sudo`, `apt-get update`, {silent: true}],
+        [`sudo`, `apt-get install -y python-setuptools`, {silent: true}],
+        [`sudo`, `pip install ${constants.iotedgedev}`, {silent: true}],
       ]
     }else if(tl.osType() === constants.osTypeWindows) {
       cmds = [

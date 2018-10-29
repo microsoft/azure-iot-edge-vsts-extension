@@ -49,14 +49,14 @@ class azureclitask {
         if (addResult.stderr.includes('ImportError: libffi.so.5')) {
           let azRepo = tl.execSync('lsb_release', '-cs', {silent: true}).stdout.trim();
           console.log(`\n--------------------Error--------------------.\n Something wrong with built-in Azure CLI in agent, can't install az-cli-iot-ext.\nTry to fix with reinstall the ${azRepo} version of Azure CLI.\n\n`);
-          tl.debug(tl.execSync('rm', '/etc/apt/sources.list.d/azure-cli.list', {silent: true}));
-          fs.writeFileSync('/etc/apt/sources.list.d/azure-cli.list', `deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`, {silent: true});
-          tl.debug(tl.execSync('cat', '/etc/apt/sources.list.d/azure-cli.list', {silent: true}));
-          tl.debug(tl.execSync('apt-key', 'adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893', {silent: true}));
-          tl.debug(tl.execSync('apt-get', 'install apt-transport-https', {silent: true}));
-          tl.debug(tl.execSync('apt-get', 'update', {silent: true}));
-          tl.debug(tl.execSync('apt-get', '--assume-yes remove azure-cli', {silent: true}));
-          tl.debug(tl.execSync('apt-get', '--assume-yes install azure-cli', {silent: true}));
+          tl.debug(tl.execSync('sudo', 'rm /etc/apt/sources.list.d/azure-cli.list', {silent: true}));
+          fs.writeFileSync('sudo', `/etc/apt/sources.list.d/azure-cli.list deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${azRepo} main`, {silent: true});
+          tl.debug(tl.execSync('sudo', 'cat /etc/apt/sources.list.d/azure-cli.list', {silent: true}));
+          tl.debug(tl.execSync('sudo', 'apt-key adv --keyserver packages.microsoft.com --recv-keys 52E16F86FEE04B979B07E28DB02C46DF417A0893', {silent: true}));
+          tl.debug(tl.execSync('sudo', 'apt-get install apt-transport-https', {silent: true}));
+          tl.debug(tl.execSync('sudo', 'apt-get update', {silent: true}));
+          tl.debug(tl.execSync('sudo', 'apt-get --assume-yes remove azure-cli', {silent: true}));
+          tl.debug(tl.execSync('sudo', 'apt-get --assume-yes install azure-cli', {silent: true}));
           let r = tl.execSync('az', 'extension add --name azure-cli-iot-ext --debug', {silent: true});
           tl.debug(r);
           if (r.code === 1) {
