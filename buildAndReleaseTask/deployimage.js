@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const tl = require('vsts-task-lib/task');
-const request = require('request');
 const crypto = require('crypto');
 const os = require('os');
 const util = require('./util');
@@ -180,31 +179,6 @@ class azureclitask {
 }
 
 azureclitask.isLoggedIn = false;
-
-function deployToDevice(hostname, deviceId, sasToken, deploymentJson) {
-  let url = `https://${hostname}/devices/${deviceId}/applyConfigurationContent?api-version=2017-11-08-preview`;
-  let options = {
-    url,
-    headers: {
-      "Authorization": sasToken,
-      "Content-Type": "application/json"
-    },
-    method: 'POST',
-    body: JSON.stringify(deploymentJson),
-  }
-  return new Promise((resolve, reject) => {
-    request(options, (err, response, body) => {
-      if (err) {
-        reject(err);
-      }
-      if (response && response.statusCode === 204) {
-        resolve(deviceId);
-      } else {
-        console.log(response.statusCode, body);
-      }
-    });
-  });
-}
 
 function run(telemetryEvent) {
   try {
