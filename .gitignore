@@ -1,2 +1,4 @@
 *.vsix
 .vscode/
+*.ps1
+build-test-config.json
