@@ -4,12 +4,36 @@ const tl = require('vsts-task-lib/task');
 const ContainerConnection = require('docker-common/containerconnection').default;
 const sourceUtils = require('docker-common/sourceutils');
 const imageUtils = require('docker-common/containerimageutils');
+const AuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/authenticationtokenprovider');
+const ACRAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/acrauthenticationtokenprovider').default;
+const GenericAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/genericauthenticationtokenprovider').default;
 const constants = require('./constant');
 const util = require('./util');
 const serviceEndpointsHandler = require('./serviceEndpointHandler');
 
-function run(registryAuthenticationToken, doPush) {
+function getRegistryAuthenticationToken() {
+  // get the registry server authentication provider 
+  var registryType = tl.getInput("containerregistrytype", true);
+  var authenticationProvider;
+
+  if (registryType == "Azure Container Registry") {
+    authenticationProvider = new ACRAuthenticationTokenProvider(tl.getInput("azureSubscriptionEndpoint"), tl.getInput("azureContainerRegistry"));
+  }
+  else {
+    authenticationProvider = new GenericAuthenticationTokenProvider(tl.getInput("dockerRegistryEndpoint"));
+  }
+
+  return authenticationProvider.getAuthenticationToken();
+}
+
+function run(doPush) {
   try {
+    let registryAuthenticationToken;
+    try {
+      registryAuthenticationToken = getRegistryAuthenticationToken();
+    }catch(e) {
+      throw Error(`Error happened when fetching docker registry authentication token. Please check you docker credential`);
+    }
     let inputs = tl.getDelimitedInput("moduleJsons", "\n");
     // Error handling: Remind for empty set
     if(!inputs || inputs.length === 0) {

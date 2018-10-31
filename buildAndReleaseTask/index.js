@@ -2,9 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const tl = require('vsts-task-lib/task');
 const ContainerConnection = require('docker-common/containerconnection').default;
-const AuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/authenticationtokenprovider');
-const ACRAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/acrauthenticationtokenprovider').default;
-const GenericAuthenticationTokenProvider = require('docker-common/registryauthenticationprovider/genericauthenticationtokenprovider').default;
 const buildImage = require('./buildimage');
 const deployImage = require('./deployimage');
 const trackEvent = require('./telemetry');
@@ -17,19 +14,6 @@ util.debugOsType(tl);
 
 // Change to any specified working directory
 tl.cd(tl.getInput("cwd"));
-
-// get the registry server authentication provider 
-var registryType = tl.getInput("containerregistrytype", true);
-var authenticationProvider;
-
-if (registryType == "Azure Container Registry") {
-  authenticationProvider = new ACRAuthenticationTokenProvider(tl.getInput("azureSubscriptionEndpoint"), tl.getInput("azureContainerRegistry"));
-}
-else {
-  authenticationProvider = new GenericAuthenticationTokenProvider(tl.getInput("dockerRegistryEndpoint"));
-}
-
-var registryAuthenticationToken = authenticationProvider.getAuthenticationToken();
 
 let startTime = new Date();
 
@@ -54,7 +38,7 @@ let telemetryEvent = {
 
 if (action === 'Build modules') {
   console.log('Building image...');
-  buildImage.run(registryAuthenticationToken, false)
+  buildImage.run(false)
     .then(() => {
       console.log('Finished building image');
       telemetryEvent.isSuccess = true;
@@ -70,8 +54,8 @@ if (action === 'Build modules') {
     });
 } else if (action === 'Build and Push modules') {
   console.log('Building and pushing image...');
-  telemetryEvent.isACR = registryType === "Azure Container Registry";
-  buildImage.run(registryAuthenticationToken, true)
+  telemetryEvent.isACR = tl.getInput("containerregistrytype", true) === "Azure Container Registry";
+  buildImage.run(true)
     .then(() => {
       console.log('Finished building and pushing image');
       telemetryEvent.isSuccess = true;
