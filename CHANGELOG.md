@@ -1,5 +1,9 @@
 ## Changelog
 
+### 1.1.1
++ Fix: Check container registry for the Build-only task
++ Fix: Print Operating System information
+
 ### 1.1.0
 + Integrate with iotedgedev CLI to do docker related work
 + Suppport to use Windows Build Agent(Hosted VS2017) which will use Windows Container to build docker image

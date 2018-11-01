@@ -117,14 +117,19 @@ function run(doPush) {
      * However, "michaeljqzq" is not in the scope of a credential.
      * So here is a work around to login in advanced call to `iotedgedev push` and then logout after everything done.
      */
-    tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`, {silent: true})
+    if(doPush) {
+      tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`, {silent: true})
+    }
 
     let envList = {
       [constants.iotedgedevEnv.bypassModules]: bypassModules.join(),
-      [constants.iotedgedevEnv.registryServer]: registryAuthenticationToken.getLoginServerUrl(),
-      [constants.iotedgedevEnv.registryUsername]: registryAuthenticationToken.getUsername(),
-      [constants.iotedgedevEnv.registryPassword]: registryAuthenticationToken.getPassword(),
     };
+
+    if(doPush) {
+      envList[constants.iotedgedevEnv.registryServer] = registryAuthenticationToken.getLoginServerUrl();
+      envList[constants.iotedgedevEnv.registryUsername] = registryAuthenticationToken.getUsername();
+      envList[constants.iotedgedevEnv.registryPassword] = registryAuthenticationToken.getPassword();
+    }
 
     // Pass task variable to sub process
     let tlVariables = tl.getVariables();
@@ -140,8 +145,10 @@ function run(doPush) {
       cwd: tl.cwd(),
       env: envList,
     }).then((val)=>{
-      tl.execSync(`docker`, `logout`, {silent: true});
-      util.createOrAppendDockerCredentials(tl, registryAuthenticationToken);
+      if(doPush) {
+        tl.execSync(`docker`, `logout`, {silent: true});
+        util.createOrAppendDockerCredentials(tl, registryAuthenticationToken);
+      }
 
       let dockerCredentials = util.readDockerCredentials(tl, true);
       tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
