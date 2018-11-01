@@ -23,7 +23,11 @@ function getRegistryAuthenticationToken() {
     authenticationProvider = new GenericAuthenticationTokenProvider(tl.getInput("dockerRegistryEndpoint"));
   }
 
-  return authenticationProvider.getAuthenticationToken();
+  let token = authenticationProvider.getAuthenticationToken();
+  if (token == null) {
+    throw Error('Failed to fetch container registry authentication token, please check you container registry setting in build task');
+  }
+  return token;
 }
 
 function run(doPush) {
@@ -129,6 +133,8 @@ function run(doPush) {
         envList[v.name] = v.value;
       }
     }
+
+    tl.debug(`Following variables will be passed to the iotedgedev command: ${JSON.stringify(envList)}`);
 
     return tl.exec(`${constants.iotedgedev}`, doPush ? `push` : `build`, {
       cwd: tl.cwd(),
