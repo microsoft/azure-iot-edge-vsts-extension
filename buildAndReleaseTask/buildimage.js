@@ -134,8 +134,10 @@ function run(doPush) {
     // Pass task variable to sub process
     let tlVariables = tl.getVariables();
     for (let v of tlVariables) {
-      if (!envList[v.name]) {
-        envList[v.name] = v.value;
+      // The variables in VSTS build contains dot, need to convert to underscore.
+      let name = v.name.replace('.', '_').toUpperCase();
+      if (!envList[name]) {
+        envList[name] = v.value;
       }
     }
 
