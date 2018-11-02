@@ -30,7 +30,17 @@
   "links": {
     "getstarted": {
       "uri": "https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd"
+    },
+    "repository": {
+      "uri": "https://github.com/Microsoft/azure-iot-edge-vsts-extension"
+    },
+    "issues": {
+      "uri": "https://github.com/Microsoft/azure-iot-edge-vsts-extension/issues"
     }
+  },
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/Microsoft/azure-iot-edge-vsts-extension"
   },
   "icons": {
     "default": "images/extension-icon.png"
