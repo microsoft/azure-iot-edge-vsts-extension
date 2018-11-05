@@ -121,7 +121,7 @@ When meeting issue, please follow the steps to open an issue on our [Github repo
 
 ## Data/Telemetry
 
-This project collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](http://go.microsoft.com/fwlink/?LinkId=521839) to learn more.
+This project collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](http://go.microsoft.com/fwlink/?LinkId=521839) to learn more. If you don’t wish to send usage data to Microsoft, you can change your telemetry settings by setting variable `DISABLE_TELEMETRY` to `true`.
 
 ## Contact Information
 We fully welcome your feedback or suggestion for the extension, you can send Email to `Azure IoT Edge Tooling team` vsciet@microsoft.com

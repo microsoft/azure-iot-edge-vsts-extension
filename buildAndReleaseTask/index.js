@@ -36,6 +36,8 @@ let telemetryEvent = {
   taskTime: null,
 }
 
+let telemetryEnabled = (tl.getVariable(constants.variableKeyDisableTelemetry) !== 'true');
+
 if (action === 'Build modules') {
   console.log('Building image...');
   buildImage.run(false)
@@ -43,13 +45,13 @@ if (action === 'Build modules') {
       console.log('Finished building image');
       telemetryEvent.isSuccess = true;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
-      trackEvent(action, telemetryEvent);
+      if(telemetryEnabled) trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Succeeded, "");
     })
     .catch((err) => {
       telemetryEvent.isSuccess = false;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
-      trackEvent(action, telemetryEvent);
+      if(telemetryEnabled) trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Failed, err);
     });
 } else if (action === 'Build and Push modules') {
@@ -60,13 +62,13 @@ if (action === 'Build modules') {
       console.log('Finished building and pushing image');
       telemetryEvent.isSuccess = true;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
-      trackEvent(action, telemetryEvent);
+      if(telemetryEnabled) trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Succeeded, "");
     })
     .catch((err) => {
       telemetryEvent.isSuccess = false;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
-      trackEvent(action, telemetryEvent);
+      if(telemetryEnabled) trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Failed, err);
     });
 } else if (action === 'Deploy to IoT Edge devices') {
@@ -77,13 +79,13 @@ if (action === 'Build modules') {
       console.log('Finished Deploying image');
       telemetryEvent.isSuccess = true;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
-      trackEvent(action, telemetryEvent);
+      if(telemetryEnabled) trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Succeeded, "");
     })
     .catch((err) => {
       telemetryEvent.isSuccess = false;
       telemetryEvent.taskTime = (new Date() - startTime) / 1000;
-      trackEvent(action, telemetryEvent);
+      if(telemetryEnabled) trackEvent(action, telemetryEvent);
       tl.setResult(tl.TaskResult.Failed, err);
     });
 }

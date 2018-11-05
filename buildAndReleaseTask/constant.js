@@ -23,6 +23,7 @@ let constant = {
   osTypeWindows: "Windows_NT",
   osTypeMac: "Darwin",
   defaultDockerHubHostname: "docker.io",
+  variableKeyDisableTelemetry: "DISABLE_TELEMETRY",
 }
 
 module.exports = constant;
