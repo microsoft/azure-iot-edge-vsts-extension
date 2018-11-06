@@ -1,4 +1,4 @@
-const appInsights = require('applicationinsights');
+import * as appInsights from 'applicationinsights';
 const metadata = {
   id: 'iot-edge-build-deploy',
   version: '1.1.1',
@@ -10,10 +10,10 @@ const instrumentKey = 'fed7fc65-5b4a-4e66-9d46-c5f016d4e2b4';
 appInsights.setup(instrumentKey);
 let client = appInsights.defaultClient;
 
-function traceEvent(name, property, metric) {
+export default function traceEvent(name: string, property: Object) {;
   // Zhiqing change default behavior or it will a minute to send retry request before the process exit
   // Patched the applicationinsights.js
-  let properties = Object.assign({}, property, {
+  let properties = (<any>Object).assign({}, property, {
     'common.extname': `${metadata.publisher}.${metadata.id}`,
     'common.extversion': metadata.version,
   });
@@ -24,4 +24,15 @@ function traceEvent(name, property, metric) {
   client.flush();
 }
 
-module.exports = traceEvent;
+export interface TelemetryEvent {
+  hashTeamProjectId: string,
+  taskType: string,
+  osType: string,
+  buildId: string,
+  isSuccess: boolean
+  taskTime: number,
+  isACR?: boolean,
+  hashIoTHub?: string,
+  iotHubHostNameHash?: string,
+  iotHubDomain?: string,
+}

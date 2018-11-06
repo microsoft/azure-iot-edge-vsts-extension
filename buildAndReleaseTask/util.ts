@@ -1,45 +1,52 @@
-const constants = require('./constant');
-const path = require('path');
-const fs = require('fs');
-const crypto = require('crypto');
+import Constants from "./constant";
+import * as tl from "vsts-task-lib/task";
+import * as crypto from "crypto";
+import RegistryAuthenticationToken from "docker-common/registryauthenticationprovider/registryauthenticationtoken";
+import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
 
-class Util {
-  static expandEnv(input, ...exceptKeys) {
-    const pattern = new RegExp(/\$([a-zA-Z0-9_]+)|\${([a-zA-Z0-9_]+)}/g);
-    const exceptSet = new Set(exceptKeys);
+interface Cmd {
+  path: string;
+  arg: string;
+  execOption: IExecSyncOptions;
+}
+
+export default class Util {
+  public static expandEnv(input: string, ...exceptKeys: string[]): string {
+    const pattern: RegExp = new RegExp(/\$([a-zA-Z0-9_]+)|\${([a-zA-Z0-9_]+)}/g);
+    const exceptSet: Set<string> = new Set(exceptKeys);
     return input.replace(pattern, (matched) => {
       if (exceptKeys && exceptSet.has(matched)) {
         return matched;
       }
-      const key = matched.replace(/\$|{|}/g, "");
+      const key: string = matched.replace(/\$|{|}/g, "");
       return process.env[key] || matched;
     });
   }
 
-  static validateModuleJson(moduleJsonObject) {
+  public static validateModuleJson(moduleJsonObject: any): void {
     // Will throw error if parent property does not exist
     if (moduleJsonObject.image.tag.platforms == undefined) {
-      throw new Error(`${constants.fileNameModuleJson} image.tag.platforms not set`);
+      throw new Error(`${Constants.fileNameModuleJson} image.tag.platforms not set`);
     }
     if (moduleJsonObject.image.repository == undefined) {
-      throw new Error(`${constants.fileNameModuleJson} image.repository not set`);
+      throw new Error(`${Constants.fileNameModuleJson} image.repository not set`);
     }
     if (moduleJsonObject.image.tag.version == undefined) {
-      throw new Error(`${constants.fileNameModuleJson} image.tag.version not set`);
+      throw new Error(`${Constants.fileNameModuleJson} image.tag.version not set`);
     }
   }
 
-  static validateDeployTemplateJson(templateJsonObject) {
+  public static validateDeployTemplateJson(templateJsonObject: any): void {
     // Will throw error if parent property does not exist
     if (Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['modules'] == undefined) {
-      throw new Error(`${constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['modules'] not set`);
+      throw new Error(`${Constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['modules'] not set`);
     }
     if (Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['systemModules'] == undefined) {
-      throw new Error(`${constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
+      throw new Error(`${Constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
     }
   }
 
-  static generateSasToken(resourceUri, signingKey, policyName, expiresInMins = 3600) {
+  public static generateSasToken(resourceUri: string, signingKey: string, policyName: string, expiresInMins: number = 3600) {
     resourceUri = encodeURIComponent(resourceUri);
 
     // Set expiration in seconds
@@ -59,12 +66,7 @@ class Util {
     return token;
   }
 
-  static parseIoTCS(cs) {
-    let m = cs.match(/HostName=(.*);SharedAccessKeyName=(.*);SharedAccessKey=(.*)$/);
-    return m.slice(1);
-  }
-
-  static findFiles(filepath, tl) {
+  public static findFiles(filepath: string): string[] {
     if (filepath.indexOf('*') >= 0 || filepath.indexOf('?') >= 0) {
       tl.debug(tl.loc('ContainerPatternFound'));
       var buildFolder = tl.cwd();
@@ -84,9 +86,9 @@ class Util {
     }
   }
 
-  static getServiceEndpoints(tl) {
+  public static getServiceEndpoints() {
     let result = {};
-    let endpoints = constants.serviceEndpoints;
+    let endpoints = Constants.serviceEndpoints;
     for (let k of Object.keys(endpoints)) {
       if (endpoints[k].inputName && tl.getInput(endpoints[k].inputName)) {
         result[k] = {
@@ -98,7 +100,7 @@ class Util {
     return result;
   }
 
-  static getModulesContent(templateObject) {
+  public static getModulesContent(templateObject: any): any {
     if (templateObject.modulesContent != undefined) {
       return templateObject.modulesContent;
     }
@@ -108,33 +110,33 @@ class Util {
     throw Error(`Property moduleContent or modulesContent can't be found in template`);
   }
 
-  static setupIotedgedev(tl) {
+  public static setupIotedgedev(): void {
     try {
-      let result = tl.execSync(`${constants.iotedgedev}`, `--version`, {silent: true});
+      let result = tl.execSync(`${Constants.iotedgedev}`, `--version`, Constants.execSyncSilentOption);
       if (result.code === 0) {
-        console.log(`${constants.iotedgedev} already installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
+        console.log(`${Constants.iotedgedev} already installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
         return;
       }
     } catch(e) {
       // If exception, it means iotedgedev is not installed. Do nothing.
     }
 
-    let cmds = null;
-    if(tl.osType() === constants.osTypeLinux) {
+    let cmds: Cmd[] = [];
+    if(tl.osType() === Constants.osTypeLinux) {
       cmds = [
-        [`sudo`, `apt-get update`, {silent: true}],
-        [`sudo`, `apt-get install -y python-setuptools`, {silent: true}],
-        [`sudo`, `pip install ${constants.iotedgedev}`, {silent: true}],
+        {path: `sudo`, arg: `apt-get update`, execOption: Constants.execSyncSilentOption},
+        {path: `sudo`, arg: `apt-get install -y python-setuptools`, execOption: Constants.execSyncSilentOption},
+        {path: `sudo`, arg: `pip install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption},
       ]
-    }else if(tl.osType() === constants.osTypeWindows) {
+    }else if(tl.osType() === Constants.osTypeWindows) {
       cmds = [
-        [`pip`, `install ${constants.iotedgedev}`, {silent: true}],
+        {path: `pip`, arg: `install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption},
       ]
     }
     
     try {
       for (let cmd of cmds) {
-        let result = tl.execSync(cmd[0], cmd[1], cmd[2]);
+        let result = tl.execSync(cmd.path, cmd.arg, cmd.execOption);
         if (result.code !== 0) {
           tl.debug(result.stderr);
         }
@@ -144,24 +146,24 @@ class Util {
       tl.debug(e);
     }
     
-    let result = tl.execSync(`${constants.iotedgedev}`, `--version`, {silent: true});
+    let result = tl.execSync(`${Constants.iotedgedev}`, `--version`, Constants.execSyncSilentOption);
     if (result.code === 0) {
-      console.log(`${constants.iotedgedev} installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
+      console.log(`${Constants.iotedgedev} installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
     } else {
-      throw Error(`${constants.iotedgedev} installation failed, see detailed error in debug mode`);
+      throw Error(`${Constants.iotedgedev} installation failed, see detailed error in debug mode`);
     }
   }
 
-  static debugOsType(tl) {
-    let cmd = null;
-    if(tl.osType() === constants.osTypeWindows) {
+  public static debugOsType() {
+    let cmd: string[] = null;
+    if(tl.osType() === Constants.osTypeWindows) {
       cmd = ['systeminfo', null];
-    }else if(tl.osType() === constants.osTypeLinux) {
+    }else if(tl.osType() === Constants.osTypeLinux) {
       cmd = [`lsb_release`, `-a`];
     }
     if(cmd != null) {
       try {
-        let result = tl.execSync(...cmd, {silent: true});
+        let result = tl.execSync(cmd[0], cmd[1], Constants.execSyncSilentOption);
         tl.debug(`OS is ${result.stdout}`);
       }catch(e) {
         console.log(`Error happened when fetching os info: ${e.message}`);
@@ -176,9 +178,9 @@ class Util {
   // "zhiqing.azurecr.io","http://zhiqing.azurecr.io" true
   // "zhiqing.azurecr.io","https://zhiqing.azurecr.io" true
   // "zhiqing.azurecr.io","https://zhiqing.azurecr.io/" true
-  static isDockerServerMatch(a, b) {
+  public static isDockerServerMatch(a: string, b: string): boolean {
     if (a === b) return true;
-    if (a.includes(constants.defaultDockerHubHostname) && b.includes(constants.defaultDockerHubHostname)) return true;
+    if (a.includes(Constants.defaultDockerHubHostname) && b.includes(Constants.defaultDockerHubHostname)) return true;
 
     let reg = new RegExp(/^(?:https?:\/\/)?(.*?)\/?$/);
     let aMatch = reg.exec(a);
@@ -188,14 +190,14 @@ class Util {
   }
 
   // Check if self(task) is included in a build pipeline
-  static checkSelfInBuildPipeline(tl) {
+  public static checkSelfInBuildPipeline(): boolean {
     let hostType = tl.getVariable('system.hostType').toLowerCase();
     // Set to build if the pipeline is a build. For a release, the values are deployment for a Deployment group job and release for an Agent job.
     return hostType === 'build';
   }
 
-  static createOrAppendDockerCredentials(tl, registryAuthenticationToken) {
-    let creVar = tl.getVariable(constants.fileNameDockerCredential);
+  public static createOrAppendDockerCredentials(registryAuthenticationToken: RegistryAuthenticationToken): void {
+    let creVar = tl.getVariable(Constants.fileNameDockerCredential);
 
     let credentials = creVar ? JSON.parse(creVar) : [];
     if (registryAuthenticationToken) {
@@ -205,19 +207,17 @@ class Util {
         address: registryAuthenticationToken.getLoginServerUrl()
       });
     }
-    tl.setVariable(constants.fileNameDockerCredential, JSON.stringify(credentials));
+    tl.setVariable(Constants.fileNameDockerCredential, JSON.stringify(credentials));
   }
 
-  static readDockerCredentials(tl, inBuildPipeline) {
-    let creVar = tl.getVariable(constants.fileNameDockerCredential);
+  public static readDockerCredentials(): any[] {
+    let creVar = tl.getVariable(Constants.fileNameDockerCredential);
 
     let credentials = creVar ? JSON.parse(creVar) : [];
     return credentials;
   }
 
-  static sha256(input) {
+  public static sha256(input: string): string {
     return crypto.createHash('sha256').update(input).digest('hex');
   }
 }
-
-module.exports = Util;
