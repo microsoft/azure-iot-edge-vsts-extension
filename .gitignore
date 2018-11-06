@@ -2,3 +2,4 @@
 .vscode/
 *.ps1
 build-test-config.json
+buildAndReleaseTask/node_modules

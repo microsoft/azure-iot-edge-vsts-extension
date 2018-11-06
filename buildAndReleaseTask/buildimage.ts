@@ -40,7 +40,7 @@ export async function run(doPush: boolean) {
   if (!inputs || inputs.length === 0) {
     return Promise.reject(new Error('module.json setting is empty. So no modules will be built'));
   }
-  let moduleJsons = new Set();
+  let moduleJsons = new Set<string>();
   for (let input of inputs) {
     for (let result of util.findFiles(input)) {
       moduleJsons.add(result);
@@ -68,7 +68,7 @@ export async function run(doPush: boolean) {
   for (let moduleJson of moduleJsons) {
     let moduleJsonObject;
     try {
-      moduleJsonObject = JSON.parse(fs.readFileSync(moduleJson, "utf-8"));
+      moduleJsonObject = JSON.parse(fs.readFileSync(moduleJson, Constants.UTF8));
     } catch (e) {
       // If something error happened in parse JSON, then don't put it in selected modules list.
       continue;

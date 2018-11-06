@@ -2,9 +2,7 @@
   "dependencies": {
     "applicationinsights": "^1.0.2",
     "docker-common": "file:./node_modules/docker-common-1.0.0.tgz",
-    "vsts-task-lib": "^2.3.0"
-  },
-  "devDependencies": {
+    "vsts-task-lib": "^2.3.0",
     "@types/node": "^9.6.36",
     "@types/q": "^1.5.1"
   }
