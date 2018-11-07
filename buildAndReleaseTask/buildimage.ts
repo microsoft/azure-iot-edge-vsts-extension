@@ -30,11 +30,14 @@ function getRegistryAuthenticationToken(): RegistryAuthenticationToken {
 
 export async function run(doPush: boolean) {
   let registryAuthenticationToken: RegistryAuthenticationToken;
-  try {
-    registryAuthenticationToken = getRegistryAuthenticationToken();
-  } catch (e) {
-    throw Error(`Error happened when fetching docker registry authentication token. Please check you docker credential`);
+  if(doPush) {
+    try {
+      registryAuthenticationToken = getRegistryAuthenticationToken();
+    } catch (e) {
+      throw Error(`Error happened when fetching docker registry authentication token. Please check you docker credential`);
+    }
   }
+  
   let inputs = tl.getDelimitedInput("moduleJsons", "\n");
   // Error handling: Remind for empty set
   if (!inputs || inputs.length === 0) {
