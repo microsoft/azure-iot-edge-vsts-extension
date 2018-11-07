@@ -1,5 +1,9 @@
 ## Changelog
 
+### 1.1.2
++ Officially open source. Add documentations, quick start guides.
++ Support hosted agent `Hosted Ubuntu 1604` for amd-64 platform build.
+
 ### 1.1.1
 + Fix: Check container registry for the Build-only task
 + Fix: Print Operating System information
