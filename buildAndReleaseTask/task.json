@@ -157,13 +157,6 @@
       "defaultValue": ""
     },
     {
-      "name": "dockerHostEndpoint",
-      "type": "connectedService:dockerhost",
-      "label": "Docker Host Connection",
-      "helpMarkDown": "Select a Docker host connection. Defaults to the agent's host.",
-      "groupName": "advanced"
-    },
-    {
       "name": "rootPath",
       "type": "string",
       "label": "Path of Edge solution root",
