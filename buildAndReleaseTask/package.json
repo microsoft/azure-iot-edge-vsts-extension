@@ -1,4 +1,6 @@
 {
+  "name": "azure-iot-edge-vsts-extension-task",
+  "version": "1.1.2",
   "dependencies": {
     "applicationinsights": "^1.0.2",
     "docker-common": "file:./node_modules/docker-common-1.0.0.tgz",
