@@ -11,7 +11,7 @@
   ],
   "description": "A tool for continuous integration(build and push docker image) and continuous deployment(create Edge deployment on Azure)",
   "categories": [
-    "Build and release"
+    "Azure Pipelines"
   ],
   "tags": [
     "Build task",
