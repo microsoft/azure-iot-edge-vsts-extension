@@ -15,12 +15,6 @@ export default class Constants {
     registryPassword: "CONTAINER_REGISTRY_PASSWORD",
     bypassModules: "BYPASS_MODULES"
   };
-  public static serviceEndpoints = {
-    nuget:{
-      inputName: "nugetFeed",
-      configFileName: "NuGet.Config",
-    }
-  };
   public static osTypeLinux = "Linux";
   public static osTypeWindows = "Windows_NT";
   public static osTypeMac = "Darwin";

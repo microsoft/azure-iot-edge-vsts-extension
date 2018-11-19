@@ -6,7 +6,6 @@ import GenericAuthenticationTokenProvider from 'docker-common/registryauthentica
 import RegistryAuthenticationToken from "docker-common/registryauthenticationprovider/registryauthenticationtoken";
 import Constants from "./constant";
 import util from "./util";
-import serviceEndpointsHandler from './serviceEndpointHandler';
 import {IExecOptions} from 'vsts-task-lib/toolrunner';
 
 function getRegistryAuthenticationToken(): RegistryAuthenticationToken {
@@ -50,19 +49,6 @@ export async function run(doPush: boolean) {
     }
   }
 
-  let serviceEndpoints = util.getServiceEndpoints();
-  tl.debug(`Number of service endpoints: ${Object.keys(serviceEndpoints).length}`);
-
-  let deploymentJson;
-  if (Object.keys(serviceEndpoints).length !== 0) {
-    if (!fs.existsSync(Constants.fileNameDeployTemplateJson)) {
-      return Promise.reject(new Error(`File ${Constants.fileNameDeployTemplateJson} doesn't exist in the project root folder`));
-    }
-    deploymentJson = JSON.parse(fs.readFileSync(Constants.fileNameDeployTemplateJson, Constants.UTF8));
-    // Error handling: validate deployment.json, will catch the error if property not exist
-    util.validateDeployTemplateJson(deploymentJson);
-  }
-
   let selectedModules = [];
   let modulesFolder = path.resolve(tl.cwd(), Constants.folderNameModules);
   let allModules = fs.readdirSync(modulesFolder).filter(name => fs.lstatSync(path.join(modulesFolder, name)).isDirectory());
@@ -78,24 +64,6 @@ export async function run(doPush: boolean) {
     }
     let moduleName = path.basename(path.dirname(moduleJson));
     selectedModules.push(moduleName);
-
-    // Handle for private feed
-    if (moduleJsonObject != undefined && Object.keys(serviceEndpoints).length !== 0) {
-      try {
-        let imageName = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired']['modules'][moduleName].settings.image;
-        let m = imageName.match(new RegExp("\\$\\{MODULES\\." + moduleName + "\\.(.*)\\}$", "i"));
-        if (!m || !m[1]) {
-          throw new Error(`image name ${imageName} in module ${moduleName} in deployment.json is not in right format`);
-        }
-        let platform = m[1];
-        let dockerFileRelative = moduleJsonObject.image.tag.platforms[platform];
-        let dockerFile = path.resolve(path.dirname(moduleJson), dockerFileRelative);
-        let handler = new serviceEndpointsHandler(dockerFile);
-        handler.resolve(serviceEndpoints);
-      } catch (e) {
-        console.log(`Error happens when handling service endpoints: ${e.message}`);
-      }
-    }
   }
   tl.debug(`selected modules:${JSON.stringify(selectedModules)}`);
 

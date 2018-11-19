@@ -86,20 +86,6 @@ export default class Util {
     }
   }
 
-  public static getServiceEndpoints() {
-    let result = {};
-    let endpoints = Constants.serviceEndpoints;
-    for (let k of Object.keys(endpoints)) {
-      if (endpoints[k].inputName && tl.getInput(endpoints[k].inputName)) {
-        result[k] = {
-          url: tl.getEndpointUrl(tl.getInput(endpoints[k].inputName), true),
-          authorization: tl.getEndpointAuthorization(tl.getInput(endpoints[k].inputName), true).parameters
-        }
-      }
-    }
-    return result;
-  }
-
   public static getModulesContent(templateObject: any): any {
     if (templateObject.modulesContent != undefined) {
       return templateObject.modulesContent;
