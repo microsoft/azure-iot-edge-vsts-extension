@@ -10,17 +10,7 @@ tl.setResourcePath(path.join(__dirname, 'task.json'));
 
 util.debugOsType();
 
-// Change to any specified working directory
-tl.cd(tl.getInput("cwd"));
-
 let startTime: Date = new Date();
-
-try {
-  tl.pushd(tl.getInput('rootPath'));
-} catch (e) {
-  console.log(`The Root path ${tl.getInput('rootPath')} does not exist.`);
-  tl.setResult(tl.TaskResult.Failed, `The Root path ${tl.getInput('rootPath')} does not exist.`);
-}
 
 let action: string = tl.getInput("action", true);
 

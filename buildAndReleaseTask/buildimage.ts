@@ -40,7 +40,7 @@ export async function run(doPush: boolean) {
   let inputs = tl.getDelimitedInput("moduleJsons", "\n");
   // Error handling: Remind for empty set
   if (!inputs || inputs.length === 0) {
-    return Promise.reject(new Error('module.json setting is empty. So no modules will be built'));
+    throw Error('module.json setting is empty. So no modules will be built');
   }
   let moduleJsons = new Set<string>();
   for (let input of inputs) {
@@ -72,6 +72,15 @@ export async function run(doPush: boolean) {
 
   console.log(`Number of modules to build: ${selectedModules.length}`);
 
+  let templateFilePath: string = tl.getPathInput("templateFilePath", true);
+  tl.debug(`The template file path is ${templateFilePath}`);
+  if (!fs.existsSync(templateFilePath)) {
+    throw Error(`The path of template file is not valid: ${templateFilePath}`);
+  }
+  util.setTaskRootPath(path.dirname(templateFilePath));
+
+  let outputDeploymentJsonPath: string = tl.getPathInput("outputPath", true);
+
   util.setupIotedgedev();
 
   /* 
@@ -89,6 +98,7 @@ export async function run(doPush: boolean) {
 
   let envList = {
     [Constants.iotedgedevEnv.bypassModules]: bypassModules.join(),
+    [Constants.iotedgedevEnv.deploymentFileOutputPath]: outputDeploymentJsonPath,
   };
 
   if (doPush) {
@@ -114,7 +124,12 @@ export async function run(doPush: boolean) {
       cwd: tl.cwd(),
       env: envList,
     } as IExecOptions;
-    await tl.exec(`${Constants.iotedgedev}`, doPush ? `push` : `build`, execOptions);
+    let defaultPlatform = tl.getInput('defaultPlatform', true);
+    let command: string = doPush ? `push` : `build`;
+    command += ` --file ${templateFilePath}`;
+    command += ` --platform ${defaultPlatform}`;
+    await tl.exec(`${Constants.iotedgedev}`, command, execOptions);
+
     if (doPush) {
       tl.execSync(`docker`, `logout`, Constants.execSyncSilentOption);
       util.createOrAppendDockerCredentials(registryAuthenticationToken);
@@ -123,21 +138,23 @@ export async function run(doPush: boolean) {
     let dockerCredentials = util.readDockerCredentials();
     tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
 
-    let pathToFind = path.resolve(Constants.folderNameConfig);
-    if (!fs.existsSync(path.resolve(pathToFind, Constants.fileNameDeploymentJson))) {
-      throw new Error(`${Constants.fileNameDeploymentJson} can't be found under ${pathToFind}`);
+    if (!fs.existsSync(outputDeploymentJsonPath)) {
+      throw new Error(`The generated deployment file can't be found in the path: ${outputDeploymentJsonPath}`);
     }
-    let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(pathToFind, Constants.fileNameDeploymentJson), Constants.UTF8));
+    console.log(`The generated deployment file located in the path: ${outputDeploymentJsonPath}`);
+
+    let deploymentJson = JSON.parse(fs.readFileSync(outputDeploymentJsonPath, Constants.UTF8));
     // Expand docker credentials
     // Will replace the registryCredentials if the server match
     if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
+      console.log('Expanding registry credentials in deployment file...');
       let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
       for (let key of Object.keys(credentials)) {
         if (credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
           tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
           for (let dockerCredential of dockerCredentials) {
             if (util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
-              tl.debug(`Found matched cred in file: ${dockerCredential.address}`);
+              console.log(`Replace credential: ${dockerCredential.address}`);
               credentials[key] = dockerCredential;
               break;
             }
@@ -146,7 +163,7 @@ export async function run(doPush: boolean) {
       }
     }
 
-    fs.writeFileSync(path.resolve(pathToFind, Constants.fileNameDeploymentJson), JSON.stringify(deploymentJson, null, 2));
+    fs.writeFileSync(outputDeploymentJsonPath, JSON.stringify(deploymentJson, null, 2));
   } catch (e) {
     tl.execSync(`docker`, `logout`, Constants.execSyncSilentOption);
     throw e;

@@ -180,28 +180,36 @@ class azureclitask {
 
 export async function run(telemetryEvent: TelemetryEvent) {
   let inBuildPipeline: boolean = util.checkSelfInBuildPipeline();
-  let pathToFind: string = inBuildPipeline ? Constants.folderNameConfig : '.';
+  console.log(`Deployment task is running in build pipeline? ${inBuildPipeline}`);
+  let deploymentFilePath: string = tl.getPathInput('deploymentFilePath', true);
 
-  if (!inBuildPipeline) {
-    // Find the deployment.json files in all dirs (artifact dirs)
-    let findPaths = util.findFiles(`**/${Constants.fileNameDeploymentJson}`);
-    tl.debug(`Found ${findPaths.length} result for deployment.json`);
-    if (!findPaths || findPaths.length === 0) {
-      throw new Error(`Deployment task is in release pipeline, but ${Constants.fileNameDeploymentJson} can't be found. Please ensure deployment.json contains in artifacts.`);
+  // Find the deployment.json file
+  let findPaths: string[] = util.findFiles(deploymentFilePath);
+  tl.debug(`Found ${findPaths.length} result for deployment file:`);
+  if (!findPaths || findPaths.length === 0) {
+    throw new Error(`Deployment file can't be found. Please ensure Path of deployment file is correctly set in the task.`);
+  }
+
+  for(let path of findPaths) {
+    console.log(path);
+  }
+
+  let deploymentJson: any = null;
+  for(let path of findPaths) {
+    console.log(`Checking if the following file is a valid json: ${path}`);
+    try {
+      deploymentJson = JSON.parse(fs.readFileSync(path, Constants.UTF8));
+    }catch (e) {
+      console.log('Invalid');
+      continue;
     }
-    pathToFind = path.dirname(findPaths[0]);
-    tl.debug(`The path of ${Constants.fileNameDeploymentJson} is ${pathToFind}`);
+    console.log('Valid');
+    break;
   }
 
-  if (inBuildPipeline && !fs.existsSync(path.resolve(pathToFind, Constants.fileNameDeploymentJson))) {
-    console.log(`Found deployment task in build pipeline and not found ${path.resolve(pathToFind, Constants.fileNameDeploymentJson)}. It should be an error`);
-    util.setupIotedgedev();
-    tl.execSync(`${Constants.iotedgedev}`, `genconfig`, {
-      cwd: tl.cwd()
-    } as IExecSyncOptions);
+  if(deploymentJson == null) {
+    throw new Error('Cannot find a valid deployment file. Please ensure Path of deployment file is correctly set in the task.');
   }
-
-  let deploymentJson = JSON.parse(fs.readFileSync(path.resolve(pathToFind, Constants.fileNameDeploymentJson), Constants.UTF8));
 
   if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
     throw new Error('Azure SDK not found');

@@ -38,6 +38,15 @@
       "helpMarkDown": "Select an Edge action."
     },
     {
+      "name": "deploymentFilePath",
+      "type": "filePath",
+      "label": "Path of deployment file",
+      "defaultValue": "$(System.DefaultWorkingDirectory)/**/*.json",
+      "required": true,
+      "visibleRule": "action == Deploy to IoT Edge devices",
+      "helpMarkDown": "Select the deployment json file. If this task is in release pipeline, you can keep the default value. If this task is in build pipeline, you need to set it to the path of generated deployment file path."
+    },
+    {
       "name": "connectedServiceNameARM",
       "aliases": [
         "azureSubscription"
@@ -103,6 +112,32 @@
       "helpMarkDown": "Input the target condition of devices you would like to deploy. Do not use double quote. Example: tags.building=9 and tags.environment='test'. For more information: https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment"
     },
     {
+      "name": "templateFilePath",
+      "type": "filePath",
+      "label": "Path of template file",
+      "defaultValue": "deployment.template.json",
+      "visibleRule": "action = Build modules || action = Build and Push modules",
+      "required": true,
+      "helpMarkDown": "The path of Edge solution template file."
+    },
+    {
+      "name": "defaultPlatform",
+      "type": "pickList",
+      "label": "Default Platform",
+      "defaultValue": "amd64",
+      "required": true,
+      "visibleRule": "action = Build modules || action = Build and Push modules",
+      "options": {
+        "amd64": "amd64",
+        "windows-amd64": "windows-amd64",
+        "arm32v7": "arm32v7"
+      },
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "helpMarkDown": "In your solution template, you can leave the modules platform unspecified. For these modules, the default platform will be used."
+    },
+    {
       "name": "moduleJsons",
       "type": "multiline",
       "label": "Module.json File",
@@ -130,9 +165,19 @@
         "dockerRegistryConnection"
       ],
       "type": "connectedService:dockerregistry",
+      "required": true,
       "label": "Docker Registry Connection",
       "helpMarkDown": "Select a Docker registry connection. Required for commands that need to authenticate with a registry.",
       "visibleRule": "containerregistrytype = Container Registry"
+    },
+    {
+      "name": "outputPath",
+      "type": "filePath",
+      "label": "Path of output deployment file",
+      "defaultValue": "$(Build.ArtifactStagingDirectory)/deployment.json",
+      "visibleRule": "action = Build modules || action = Build and Push modules",
+      "required": true,
+      "helpMarkDown": "The file path of output deployment json file, it will need in deploy task. If it is a relative path, it will be resolved relative to template file."
     },
     {
       "name": "azureSubscriptionEndpoint",
@@ -145,17 +190,10 @@
       "name": "azureContainerRegistry",
       "label": "Azure Container Registry",
       "type": "pickList",
+      "required": true,
       "helpMarkDown": "Select an Azure Container Registry",
       "visibleRule": "containerregistrytype = Azure Container Registry",
       "defaultValue": ""
-    },
-    {
-      "name": "rootPath",
-      "type": "string",
-      "label": "Path of Edge solution root",
-      "defaultValue": "./",
-      "required": true,
-      "helpMarkDown": "Path to the root of Edge solution. Example: If your code repository is an Edge solution, then leave it to default value './'. If your solution is under subfolder 'edge', then set it to 'edge'"
     }
   ],
   "dataSourceBindings": [

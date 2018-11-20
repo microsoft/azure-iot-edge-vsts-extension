@@ -2,7 +2,6 @@ import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
 
 export default class Constants {
   public static exceptStr = ["$edgeHub", "$edgeAgent", "$upstream"];
-  public static fileNameDeployTemplateJson = "deployment.template.json";
   public static fileNameDeploymentJson = "deployment.json";
   public static fileNameModuleJson = "module.json";
   public static fileNameDockerCredential = "VSTS_EXTENSION_EDGE_DOCKER_CREDENTIAL";
@@ -13,7 +12,8 @@ export default class Constants {
     registryServer: "CONTAINER_REGISTRY_SERVER",
     registryUsername: "CONTAINER_REGISTRY_USERNAME",
     registryPassword: "CONTAINER_REGISTRY_PASSWORD",
-    bypassModules: "BYPASS_MODULES"
+    bypassModules: "BYPASS_MODULES",
+    deploymentFileOutputPath: "DEPLOYMENT_CONFIG_FILE",
   };
   public static osTypeLinux = "Linux";
   public static osTypeWindows = "Windows_NT";

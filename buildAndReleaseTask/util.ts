@@ -3,6 +3,8 @@ import * as tl from "vsts-task-lib/task";
 import * as crypto from "crypto";
 import RegistryAuthenticationToken from "docker-common/registryauthenticationprovider/registryauthenticationtoken";
 import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
+import {Writable} from "stream";
+import { WriteStream } from "fs";
 
 interface Cmd {
   path: string;
@@ -39,10 +41,10 @@ export default class Util {
   public static validateDeployTemplateJson(templateJsonObject: any): void {
     // Will throw error if parent property does not exist
     if (Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['modules'] == undefined) {
-      throw new Error(`${Constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['modules'] not set`);
+      throw new Error(`Solution template file modulesContent['$edgeAgent']['properties.desired']['modules'] not set`);
     }
     if (Util.getModulesContent(templateJsonObject)['$edgeAgent']['properties.desired']['systemModules'] == undefined) {
-      throw new Error(`${Constants.fileNameDeployTemplateJson} modulesContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
+      throw new Error(`Solution template file modulesContent['$edgeAgent']['properties.desired']['systemModules'] not set`);
     }
   }
 
@@ -205,5 +207,24 @@ export default class Util {
 
   public static sha256(input: string): string {
     return crypto.createHash('sha256').update(input).digest('hex');
+  }
+
+  public static setTaskRootPath(root: string): void {
+    try {
+      tl.pushd(root);
+      tl.debug(`Task root path set to ${root}`);
+    } catch (e) {
+      console.log(`The Root path ${root} does not exist.`);
+      tl.setResult(tl.TaskResult.Failed, `The Root path ${root} does not exist.`);
+    }
+  }
+
+  public static async streamToString(stream: Writable): Promise<string> {
+    const chunks = [];
+    return new Promise<string>((resolve, reject) => {
+      stream.on('data', chunk => chunks.push(chunk))
+      stream.on('error', reject)
+      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+    });
   }
 }
