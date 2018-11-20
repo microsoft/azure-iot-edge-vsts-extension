@@ -37,40 +37,8 @@ export async function run(doPush: boolean) {
     }
   }
   
-  let inputs = tl.getDelimitedInput("moduleJsons", "\n");
-  // Error handling: Remind for empty set
-  if (!inputs || inputs.length === 0) {
-    throw Error('module.json setting is empty. So no modules will be built');
-  }
-  let moduleJsons = new Set<string>();
-  for (let input of inputs) {
-    for (let result of util.findFiles(input)) {
-      moduleJsons.add(result);
-    }
-  }
-
-  let selectedModules = [];
-  let modulesFolder = path.resolve(tl.cwd(), Constants.folderNameModules);
-  let allModules = fs.readdirSync(modulesFolder).filter(name => fs.lstatSync(path.join(modulesFolder, name)).isDirectory());
-  tl.debug(`all modules:${JSON.stringify(allModules)}`);
-
-  for (let moduleJson of moduleJsons) {
-    let moduleJsonObject;
-    try {
-      moduleJsonObject = JSON.parse(fs.readFileSync(moduleJson, Constants.UTF8));
-    } catch (e) {
-      // If something error happened in parse JSON, then don't put it in selected modules list.
-      continue;
-    }
-    let moduleName = path.basename(path.dirname(moduleJson));
-    selectedModules.push(moduleName);
-  }
-  tl.debug(`selected modules:${JSON.stringify(selectedModules)}`);
-
-  let bypassModules = allModules.filter(m => !selectedModules.includes(m));
-  tl.debug(`bypass modules:${JSON.stringify(bypassModules)}`);
-
-  console.log(`Number of modules to build: ${selectedModules.length}`);
+  let bypassModules = tl.getInput('bypassModules');
+  tl.debug(`Bypass Modules are: ${bypassModules}`);
 
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);
   tl.debug(`The template file path is ${templateFilePath}`);
@@ -97,7 +65,7 @@ export async function run(doPush: boolean) {
   }
 
   let envList = {
-    [Constants.iotedgedevEnv.bypassModules]: bypassModules.join(),
+    [Constants.iotedgedevEnv.bypassModules]: bypassModules,
     [Constants.iotedgedevEnv.deploymentFileOutputPath]: outputDeploymentJsonPath,
   };
 

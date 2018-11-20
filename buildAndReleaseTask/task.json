@@ -138,13 +138,12 @@
       "helpMarkDown": "In your solution template, you can leave the modules platform unspecified. For these modules, the default platform will be used."
     },
     {
-      "name": "moduleJsons",
-      "type": "multiline",
-      "label": "Module.json File",
-      "defaultValue": "**/module.json",
+      "name": "bypassModules",
+      "type": "string",
+      "label": "Bypass Modules",
+      "defaultValue": "",
       "visibleRule": "action = Build modules || action = Build and Push modules",
-      "required": true,
-      "helpMarkDown": "Path to the modules(relative to solution root path) you would like to build. You can specify multiple files, each take one line. Reference for wildcard: https://docs.microsoft.com/en-us/vsts/build-release/tasks/file-matching-patterns?view=vsts"
+      "helpMarkDown": "Select the modules that you **DO NOT** need to build(or push) in the template file, specify module names and separate with comma. Example: SampleModule1,SampleModule2. Leave empty if you would like to build all the modules in template file."
     },
     {
       "name": "containerregistrytype",
