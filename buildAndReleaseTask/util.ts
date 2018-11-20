@@ -1,10 +1,9 @@
 import Constants from "./constant";
 import * as tl from "vsts-task-lib/task";
 import * as crypto from "crypto";
-import RegistryAuthenticationToken from "docker-common/registryauthenticationprovider/registryauthenticationtoken";
 import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
 import {Writable} from "stream";
-import { WriteStream } from "fs";
+import {RegistryCredential} from './registryCredentialFactory';
 
 interface Cmd {
   path: string;
@@ -184,15 +183,15 @@ export default class Util {
     return hostType === 'build';
   }
 
-  public static createOrAppendDockerCredentials(registryAuthenticationToken: RegistryAuthenticationToken): void {
+  public static createOrAppendDockerCredentials(registryAuthenticationToken: RegistryCredential): void {
     let creVar = tl.getVariable(Constants.fileNameDockerCredential);
 
     let credentials = creVar ? JSON.parse(creVar) : [];
     if (registryAuthenticationToken) {
       credentials.push({
-        username: registryAuthenticationToken.getUsername(),
-        password: registryAuthenticationToken.getPassword(),
-        address: registryAuthenticationToken.getLoginServerUrl()
+        username: registryAuthenticationToken.username,
+        password: registryAuthenticationToken.password,
+        address: registryAuthenticationToken.serverUrl
       });
     }
     tl.setVariable(Constants.fileNameDockerCredential, JSON.stringify(credentials));

@@ -1,39 +1,37 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as tl from 'vsts-task-lib/task';
-import ACRAuthenticationTokenProvider from 'docker-common/registryauthenticationprovider/acrauthenticationtokenprovider';
-import GenericAuthenticationTokenProvider from 'docker-common/registryauthenticationprovider/genericauthenticationtokenprovider';
-import RegistryAuthenticationToken from "docker-common/registryauthenticationprovider/registryauthenticationtoken";
+import {RegistryCredential, ACRRegistry, RegistryCredentialFactory} from './registryCredentialFactory';
 import Constants from "./constant";
 import util from "./util";
 import {IExecOptions} from 'vsts-task-lib/toolrunner';
 
-function getRegistryAuthenticationToken(): RegistryAuthenticationToken {
+function getRegistryAuthenticationToken(): RegistryCredential {
   // get the registry server authentication provider 
   var registryType: string = tl.getInput("containerregistrytype", true);
-  var authenticationProvider;
+  let token: RegistryCredential;
 
   if (registryType == "Azure Container Registry") {
-    authenticationProvider = new ACRAuthenticationTokenProvider(tl.getInput("azureSubscriptionEndpoint"), tl.getInput("azureContainerRegistry"));
+    let acrObject: ACRRegistry = JSON.parse(tl.getInput("azureContainerRegistry"));
+    token = RegistryCredentialFactory.fetchACRCredential(tl.getInput("azureSubscriptionEndpoint"), acrObject);
   }
   else {
-    authenticationProvider = new GenericAuthenticationTokenProvider(tl.getInput("dockerRegistryEndpoint"));
+    token = RegistryCredentialFactory.fetchGenericCredential(tl.getInput("dockerRegistryEndpoint"));
   }
 
-  let token = authenticationProvider.getAuthenticationToken();
-  if (token == null) {
-    throw Error('Failed to fetch container registry authentication token, please check you container registry setting in build task');
+  if (token == null || token.username == null || token.password == null || token.serverUrl == null) {
+    throw Error(`Failed to fetch container registry authentication token, please check you container registry setting in build task. The token is ${JSON.stringify(token)}`);
   }
   return token;
 }
 
 export async function run(doPush: boolean) {
-  let registryAuthenticationToken: RegistryAuthenticationToken;
+  let registryAuthenticationToken: RegistryCredential;
   if(doPush) {
     try {
       registryAuthenticationToken = getRegistryAuthenticationToken();
     } catch (e) {
-      throw Error(`Error happened when fetching docker registry authentication token. Please check you docker credential`);
+      throw e;
     }
   }
   
@@ -61,7 +59,7 @@ export async function run(doPush: boolean) {
    * So here is a work around to login in advanced call to `iotedgedev push` and then logout after everything done.
    */
   if (doPush) {
-    tl.execSync(`docker`, `login -u "${registryAuthenticationToken.getUsername()}" -p "${registryAuthenticationToken.getPassword()}" ${registryAuthenticationToken.getLoginServerUrl()}`, Constants.execSyncSilentOption)
+    tl.execSync(`docker`, `login -u "${registryAuthenticationToken.username}" -p "${registryAuthenticationToken.password}" ${registryAuthenticationToken.serverUrl}`, Constants.execSyncSilentOption)
   }
 
   let envList = {
@@ -70,9 +68,9 @@ export async function run(doPush: boolean) {
   };
 
   if (doPush) {
-    envList[Constants.iotedgedevEnv.registryServer] = registryAuthenticationToken.getLoginServerUrl();
-    envList[Constants.iotedgedevEnv.registryUsername] = registryAuthenticationToken.getUsername();
-    envList[Constants.iotedgedevEnv.registryPassword] = registryAuthenticationToken.getPassword();
+    envList[Constants.iotedgedevEnv.registryServer] = registryAuthenticationToken.serverUrl;
+    envList[Constants.iotedgedevEnv.registryUsername] = registryAuthenticationToken.username;
+    envList[Constants.iotedgedevEnv.registryPassword] = registryAuthenticationToken.password;
   }
 
   // Pass task variable to sub process
