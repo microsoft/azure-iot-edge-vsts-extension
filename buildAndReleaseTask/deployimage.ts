@@ -185,7 +185,7 @@ export async function run(telemetryEvent: TelemetryEvent) {
 
   // Find the deployment.json file
   let findPaths: string[] = util.findFiles(deploymentFilePath);
-  tl.debug(`Found ${findPaths.length} result for deployment file:`);
+  tl.debug(`Found ${findPaths.length} result for deployment file: ${deploymentFilePath}`);
   if (!findPaths || findPaths.length === 0) {
     throw new Error(`Deployment file can't be found. Please ensure Path of deployment file is correctly set in the task.`);
   }

@@ -36,6 +36,7 @@ export async function run(doPush: boolean) {
   }
   
   let bypassModules = tl.getInput('bypassModules');
+  if (bypassModules == null) bypassModules = "";
   tl.debug(`Bypass Modules are: ${bypassModules}`);
 
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);
@@ -45,7 +46,8 @@ export async function run(doPush: boolean) {
   }
   util.setTaskRootPath(path.dirname(templateFilePath));
 
-  let outputDeploymentJsonPath: string = tl.getPathInput("outputPath", true);
+  let outputDeploymentJsonPath: string = path.resolve(tl.getPathInput("outputPath", true));
+  tl.debug(`The output deployment path is resolved as: ${outputDeploymentJsonPath}`);
 
   util.setupIotedgedev();
 
