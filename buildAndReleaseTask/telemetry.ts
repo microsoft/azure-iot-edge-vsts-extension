@@ -10,7 +10,7 @@ const instrumentKey = 'fed7fc65-5b4a-4e66-9d46-c5f016d4e2b4';
 appInsights.setup(instrumentKey);
 let client = appInsights.defaultClient;
 
-export default function traceEvent(name: string, property: Object) {;
+export default function traceEvent(name: string, property: Object) {
   // Zhiqing change default behavior or it will a minute to send retry request before the process exit
   // Patched the applicationinsights.js
   let properties = (<any>Object).assign({}, property, {

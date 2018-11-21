@@ -4,8 +4,8 @@ import * as tl from 'vsts-task-lib/task';
 import * as os from "os";
 import util from "./util";
 import Constants from "./constant";
-import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
-import {TelemetryEvent} from './telemetry';
+import { IExecSyncOptions } from 'vsts-task-lib/toolrunner';
+import { TelemetryEvent } from './telemetry';
 
 class azureclitask {
   private static isLoggedIn = false;
@@ -40,7 +40,7 @@ class azureclitask {
 
       this.loginAzure();
 
-      tl.debug('OS release:'+ os.release());
+      tl.debug('OS release:' + os.release());
 
       // WORK AROUND
       // In Linux environment, sometimes when install az extension, libffi.so.5 file is missing. Here is a quick fix.
@@ -63,7 +63,7 @@ class azureclitask {
           if (r.code === 1) {
             throw new Error(r.stderr);
           }
-        } else if(addResult.stderr.includes('The extension azure-cli-iot-ext already exists')) {
+        } else if (addResult.stderr.includes('The extension azure-cli-iot-ext already exists')) {
           // The job contains multiple deploy tasks
           // do nothing
         } else {
@@ -75,18 +75,18 @@ class azureclitask {
         let iotHubInfo = JSON.parse(tl.execSync('az', `iot hub show -n ${iothub}`, Constants.execSyncSilentOption).stdout);
         tl.debug(`The host name of iot hub is ${iotHubInfo.properties.hostName}`);
         telemetryEvent.iotHubHostNameHash = util.sha256(iotHubInfo.properties.hostName);
-        let reg = new RegExp(iothub+"\.(.*)");
+        let reg = new RegExp(iothub + "\.(.*)");
         let m = reg.exec(iotHubInfo.properties.hostName);
-        if(m && m[1]) {
+        if (m && m[1]) {
           telemetryEvent.iotHubDomain = m[1];
         }
-      }catch(e) {
+      } catch (e) {
         // If error when get iot hub information, ignore.
       }
 
       let result1 = tl.execSync('az', script1, Constants.execSyncSilentOption);
       let result2 = await tl.exec('az', script2);
-      if(result2 !== 0) {
+      if (result2 !== 0) {
         throw new Error(`Error for deployment`);
       }
     }
@@ -190,16 +190,16 @@ export async function run(telemetryEvent: TelemetryEvent) {
     throw new Error(`Deployment file can't be found. Please ensure Path of deployment file is correctly set in the task.`);
   }
 
-  for(let path of findPaths) {
+  for (let path of findPaths) {
     console.log(path);
   }
 
   let deploymentJson: any = null;
-  for(let path of findPaths) {
+  for (let path of findPaths) {
     console.log(`Checking if the following file is a valid json: ${path}`);
     try {
       deploymentJson = JSON.parse(fs.readFileSync(path, Constants.UTF8));
-    }catch (e) {
+    } catch (e) {
       console.log('Invalid');
       continue;
     }
@@ -207,7 +207,7 @@ export async function run(telemetryEvent: TelemetryEvent) {
     break;
   }
 
-  if(deploymentJson == null) {
+  if (deploymentJson == null) {
     throw new Error('Cannot find a valid deployment file. Please ensure Path of deployment file is correctly set in the task.');
   }
 

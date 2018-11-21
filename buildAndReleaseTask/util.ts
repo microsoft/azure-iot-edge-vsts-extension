@@ -1,9 +1,9 @@
 import Constants from "./constant";
 import * as tl from "vsts-task-lib/task";
 import * as crypto from "crypto";
-import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
-import {Writable} from "stream";
-import {RegistryCredential} from './registryCredentialFactory';
+import { IExecSyncOptions } from 'vsts-task-lib/toolrunner';
+import { Writable } from "stream";
+import { RegistryCredential } from './registryCredentialFactory';
 
 interface Cmd {
   path: string;
@@ -104,23 +104,23 @@ export default class Util {
         console.log(`${Constants.iotedgedev} already installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
         return;
       }
-    } catch(e) {
+    } catch (e) {
       // If exception, it means iotedgedev is not installed. Do nothing.
     }
 
     let cmds: Cmd[] = [];
-    if(tl.osType() === Constants.osTypeLinux) {
+    if (tl.osType() === Constants.osTypeLinux) {
       cmds = [
-        {path: `sudo`, arg: `apt-get update`, execOption: Constants.execSyncSilentOption},
-        {path: `sudo`, arg: `apt-get install -y python-setuptools`, execOption: Constants.execSyncSilentOption},
-        {path: `sudo`, arg: `pip install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption},
+        { path: `sudo`, arg: `apt-get update`, execOption: Constants.execSyncSilentOption },
+        { path: `sudo`, arg: `apt-get install -y python-setuptools`, execOption: Constants.execSyncSilentOption },
+        { path: `sudo`, arg: `pip install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption },
       ]
-    }else if(tl.osType() === Constants.osTypeWindows) {
+    } else if (tl.osType() === Constants.osTypeWindows) {
       cmds = [
-        {path: `pip`, arg: `install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption},
+        { path: `pip`, arg: `install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption },
       ]
     }
-    
+
     try {
       for (let cmd of cmds) {
         let result = tl.execSync(cmd.path, cmd.arg, cmd.execOption);
@@ -128,11 +128,11 @@ export default class Util {
           tl.debug(result.stderr);
         }
       }
-    } catch(e) {
+    } catch (e) {
       // If exception, record error message to debug
       tl.debug(e);
     }
-    
+
     let result = tl.execSync(`${Constants.iotedgedev}`, `--version`, Constants.execSyncSilentOption);
     if (result.code === 0) {
       console.log(`${Constants.iotedgedev} installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
@@ -143,16 +143,16 @@ export default class Util {
 
   public static debugOsType() {
     let cmd: string[] = null;
-    if(tl.osType() === Constants.osTypeWindows) {
+    if (tl.osType() === Constants.osTypeWindows) {
       cmd = ['systeminfo', null];
-    }else if(tl.osType() === Constants.osTypeLinux) {
+    } else if (tl.osType() === Constants.osTypeLinux) {
       cmd = [`lsb_release`, `-a`];
     }
-    if(cmd != null) {
+    if (cmd != null) {
       try {
         let result = tl.execSync(cmd[0], cmd[1], Constants.execSyncSilentOption);
         tl.debug(`OS is ${result.stdout}`);
-      }catch(e) {
+      } catch (e) {
         console.log(`Error happened when fetching os info: ${e.message}`);
       }
     }

@@ -2,7 +2,7 @@ import * as path from "path";
 import * as tl from 'vsts-task-lib/task';
 import * as BuildImage from './buildimage';
 import * as DeployImage from './deployimage';
-import trackEvent, {TelemetryEvent} from './telemetry';
+import trackEvent, { TelemetryEvent } from './telemetry';
 import Constants from "./constant";
 import util from "./util";
 

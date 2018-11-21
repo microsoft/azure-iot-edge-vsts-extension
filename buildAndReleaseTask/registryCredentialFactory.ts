@@ -19,7 +19,7 @@ export interface ACRRegistry {
 
 export class RegistryCredentialFactory {
   public static fetchACRCredential(endpointName: string, registryObject: ACRRegistry): RegistryCredential {
-    if(!endpointName || !registryObject) {
+    if (!endpointName || !registryObject) {
       throw Error(`endpointName or registryName is empty when fetching ACR credential`);
     }
     return new RegistryCredential(tl.getEndpointAuthorizationParameter(endpointName, 'serviceprincipalid', true),
@@ -28,7 +28,7 @@ export class RegistryCredentialFactory {
   }
 
   public static fetchGenericCredential(endpointName: string): RegistryCredential {
-    if(!endpointName) {
+    if (!endpointName) {
       throw Error(`endpointName or registryName is empty when fetching Generic credential`);
     }
     let registryAuth: any = tl.getEndpointAuthorization(endpointName, true).parameters;

@@ -1,4 +1,4 @@
-import {IExecSyncOptions} from 'vsts-task-lib/toolrunner';
+import { IExecSyncOptions } from 'vsts-task-lib/toolrunner';
 
 export default class Constants {
   public static exceptStr = ["$edgeHub", "$edgeAgent", "$upstream"];
