@@ -226,4 +226,14 @@ export default class Util {
       stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
     });
   }
+
+  public static normalizeDeploymentId(id: string): string {
+    if(id.length > 128) {
+      id = id.substring(0, 128);
+    }
+    id = id.toLowerCase();
+    let specialCharRegex = /[^a-z0-9\-:\+%_#\*\?!(),=@;']/g;
+    id = id.replace(specialCharRegex, '');
+    return id;
+  }
 }

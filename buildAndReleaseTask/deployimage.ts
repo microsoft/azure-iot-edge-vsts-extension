@@ -35,6 +35,9 @@ class azureclitask {
       let priority: number = parseInt(priorityInput);
       priority = isNaN(priority) ? 0 : priority;
 
+      configId = util.normalizeDeploymentId(configId);
+      console.log(`Normalized deployment id is: ${configId}`);
+
       let script1 = `iot edge deployment delete --hub-name ${iothub} --config-id ${configId}`;
       let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition ${targetCondition} --priority ${priority}`;
 

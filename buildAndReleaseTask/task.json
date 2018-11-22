@@ -70,9 +70,10 @@
       "type": "string",
       "label": "IoT Edge Deployment ID",
       "required": true,
-      "defaultValue": "azure-pipelines-deployment",
+      "defaultValue": "$(Build.Repository.Name)-deployment",
       "visibleRule": "action == Deploy to IoT Edge devices",
-      "helpMarkDown": "Input the **IoT Edge Deployment ID**, if ID exists, it will be overridden.\n Check more information for [Azure IoT Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)"
+      "helpMarkDown": "Input the **IoT Edge Deployment ID**, if ID exists, it will be overridden.\n Up to 128 lowercase letters, numbers and the following characters are allowed [ -:+%_#*?!(),=@;' ].\n Check more information for [Azure IoT Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)",
+      "groupName": "advanced"
     },
     {
       "name": "priority",
