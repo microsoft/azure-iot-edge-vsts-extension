@@ -18,10 +18,14 @@ export async function run() {
   }
   util.setTaskRootPath(path.dirname(templateFilePath));
 
+  let outputDeploymentJsonPath: string = path.resolve(tl.getPathInput("outputPath", true));
+  tl.debug(`The output deployment path is resolved as: ${outputDeploymentJsonPath}`);
+
   util.setupIotedgedev();
 
   let envList = {
     [Constants.iotedgedevEnv.bypassModules]: bypassModules,
+    [Constants.iotedgedevEnv.deploymentFileOutputPath]: outputDeploymentJsonPath,
   };
 
   // Pass task variable to sub process

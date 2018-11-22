@@ -197,7 +197,7 @@
       "type": "filePath",
       "label": "Output deployment file",
       "defaultValue": "$(Build.ArtifactStagingDirectory)/deployment.json",
-      "visibleRule": "action = Push module images",
+      "visibleRule": "action = Build module images || action = Push module images",
       "required": true,
       "helpMarkDown": "The **path of output deployment file**, it will be used in deploy task. If it is a relative path, it will be resolved relative to **path of .template.json**."
     }
