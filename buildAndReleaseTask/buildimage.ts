@@ -7,10 +7,6 @@ import util from "./util";
 import { IExecOptions } from 'vsts-task-lib/toolrunner';
 
 export async function run() {
-  let bypassModules = tl.getInput('bypassModules');
-  if (bypassModules == null) bypassModules = "";
-  tl.debug(`Bypass Modules are: ${bypassModules}`);
-
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);
   tl.debug(`The template file path is ${templateFilePath}`);
   if (!fs.existsSync(templateFilePath)) {
@@ -24,7 +20,6 @@ export async function run() {
   util.setupIotedgedev();
 
   let envList = {
-    [Constants.iotedgedevEnv.bypassModules]: bypassModules,
     [Constants.iotedgedevEnv.deploymentFileOutputPath]: outputDeploymentJsonPath,
   };
 

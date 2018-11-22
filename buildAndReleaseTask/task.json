@@ -18,10 +18,10 @@
   "instanceNameFormat": "Azure IoT Edge - $(action)",
   "groups": [
     {
-      "name": "advanced_build_push",
+      "name": "advanced_push",
       "displayName": "Advanced",
       "isExpanded": false,
-      "visibleRule": "action = Build module images || action = Push module images"
+      "visibleRule": "action = Push module images"
     },
     {
       "name": "advanced_deploy",
@@ -143,6 +143,22 @@
       "visibleRule": "containerregistrytype = Generic Container Registry"
     },
     {
+      "name": "azureSubscriptionEndpoint",
+      "type": "connectedService:AzureRM",
+      "label": "Azure subscription",
+      "helpMarkDown": "Select an Azure subscription",
+      "visibleRule": "containerregistrytype = Azure Container Registry"
+    },
+    {
+      "name": "azureContainerRegistry",
+      "label": "Azure Container Registry",
+      "type": "pickList",
+      "required": true,
+      "helpMarkDown": "Select an **Azure Container Registry**",
+      "visibleRule": "containerregistrytype = Azure Container Registry",
+      "defaultValue": ""
+    },
+    {
       "name": "templateFilePath",
       "type": "filePath",
       "label": ".template.json file",
@@ -174,23 +190,7 @@
       "label": "Bypass module(s)",
       "defaultValue": "",
       "helpMarkDown": "Select the module(s) that you **DO NOT** need to build(or push) in the .template.json, specify module names and separate with comma.\n Example: if you have 2 modules **SampleModule1,SampleModule2** in your .template.json, you want to just build or push **SampleModule1**, then you set the bypass modules as **SampleModule2**. Leave empty if you would like to build all the modules in .template.json.",
-      "groupName": "advanced_build_push"
-    },
-    {
-      "name": "azureSubscriptionEndpoint",
-      "type": "connectedService:AzureRM",
-      "label": "Azure subscription",
-      "helpMarkDown": "Select an Azure subscription",
-      "visibleRule": "containerregistrytype = Azure Container Registry"
-    },
-    {
-      "name": "azureContainerRegistry",
-      "label": "Azure Container Registry",
-      "type": "pickList",
-      "required": true,
-      "helpMarkDown": "Select an **Azure Container Registry**",
-      "visibleRule": "containerregistrytype = Azure Container Registry",
-      "defaultValue": ""
+      "groupName": "advanced_push"
     },
     {
       "name": "outputPath",
