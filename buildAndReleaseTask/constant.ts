@@ -8,6 +8,8 @@ export default class Constants {
   public static folderNameModules = "modules";
   public static folderNameConfig = "config";
   public static iotedgedev = "iotedgedev";
+  public static iotedgedevLockVersionKey = "IOTEDGEDEV_VERSION";
+  public static iotedgedevDefaultVersion = "1.1.0";
   public static iotedgedevEnv = {
     registryServer: "CONTAINER_REGISTRY_SERVER",
     registryUsername: "CONTAINER_REGISTRY_USERNAME",

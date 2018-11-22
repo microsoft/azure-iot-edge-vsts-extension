@@ -109,15 +109,20 @@ export default class Util {
     }
 
     let cmds: Cmd[] = [];
+    let version = Constants.iotedgedevDefaultVersion;
+    if (tl.getVariable(Constants.iotedgedevLockVersionKey)) {
+      version = tl.getVariable(Constants.iotedgedevLockVersionKey);
+    }
+    tl.debug(`The specified iotedgedev version is: ${version}`);
     if (tl.osType() === Constants.osTypeLinux) {
       cmds = [
         { path: `sudo`, arg: `apt-get update`, execOption: Constants.execSyncSilentOption },
         { path: `sudo`, arg: `apt-get install -y python-setuptools`, execOption: Constants.execSyncSilentOption },
-        { path: `sudo`, arg: `pip install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption },
+        { path: `sudo`, arg: `pip install ${Constants.iotedgedev}==${version}`, execOption: Constants.execSyncSilentOption },
       ]
     } else if (tl.osType() === Constants.osTypeWindows) {
       cmds = [
-        { path: `pip`, arg: `install ${Constants.iotedgedev}`, execOption: Constants.execSyncSilentOption },
+        { path: `pip`, arg: `install ${Constants.iotedgedev}==${version}`, execOption: Constants.execSyncSilentOption },
       ]
     }
 
