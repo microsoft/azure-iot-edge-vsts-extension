@@ -5,7 +5,7 @@ export class RegistryCredential {
   public username: string;
   public password: string;
 
-  constructor(serverUrl: string, username: string, password: string) {
+  constructor(username: string, password: string, serverUrl: string) {
     this.serverUrl = serverUrl;
     this.username = username;
     this.password = password;
