@@ -18,7 +18,7 @@ export default class Constants {
     deploymentFileOutputPath: "DEPLOYMENT_CONFIG_FILE",
     deploymentFileOutputFolder: "CONFIG_OUTPUT_DIR",
   };
-  public static outputFileFolder = "$(Build.ArtifactStagingDirectory)";
+  public static outputFileFolder = "Build.ArtifactStagingDirectory";
   public static osTypeLinux = "Linux";
   public static osTypeWindows = "Windows_NT";
   public static osTypeMac = "Darwin";

@@ -88,7 +88,7 @@ export async function run() {
     let dockerCredentials = util.readDockerCredentials();
     tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
 
-    let outputDeploymentJsonPath = tl.getVariable(Constants.outputVariableDeploymentPathKey);
+    let outputDeploymentJsonPath = tl.getVariable('_' + Constants.outputVariableDeploymentPathKey);
     if (!fs.existsSync(outputDeploymentJsonPath)) {
       tl.debug(`The generated deployment file can't be found in the path: ${outputDeploymentJsonPath}`);
     }else {

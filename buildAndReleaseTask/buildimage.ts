@@ -19,7 +19,7 @@ export async function run() {
   util.setupIotedgedev();
 
   let envList = {
-    [Constants.iotedgedevEnv.deploymentFileOutputFolder]: Constants.outputFileFolder,
+    [Constants.iotedgedevEnv.deploymentFileOutputFolder]: tl.getVariable(Constants.outputFileFolder),
   };
 
   // Pass task variable to sub process
@@ -52,6 +52,7 @@ export async function run() {
   let matches: RegExpMatchArray = filterReg.exec(outLog);
   if(matches && matches[1]) {
     tl.setVariable(Constants.outputVariableDeploymentPathKey, matches[1]);
+    tl.setVariable('_' + Constants.outputVariableDeploymentPathKey, matches[1]);
     tl.debug(`Set ${Constants.outputVariableDeploymentPathKey} to ${matches[1]}`);
   }
 }
