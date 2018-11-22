@@ -16,7 +16,9 @@ export default class Constants {
     registryPassword: "CONTAINER_REGISTRY_PASSWORD",
     bypassModules: "BYPASS_MODULES",
     deploymentFileOutputPath: "DEPLOYMENT_CONFIG_FILE",
+    deploymentFileOutputFolder: "CONFIG_OUTPUT_DIR",
   };
+  public static outputFileFolder = "$(Build.ArtifactStagingDirectory)";
   public static osTypeLinux = "Linux";
   public static osTypeWindows = "Windows_NT";
   public static osTypeMac = "Darwin";
@@ -24,4 +26,5 @@ export default class Constants {
   public static variableKeyDisableTelemetry = "DISABLE_TELEMETRY";
   public static execSyncSilentOption = { silent: true } as IExecSyncOptions;
   public static UTF8 = "utf8";
+  public static outputVariableDeploymentPathKey = "DEPLOYMENT_FILE_PATH";
 }

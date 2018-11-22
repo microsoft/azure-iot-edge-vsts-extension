@@ -5,6 +5,7 @@ import { RegistryCredential, ACRRegistry, RegistryCredentialFactory } from './re
 import Constants from "./constant";
 import util from "./util";
 import { IExecOptions } from 'vsts-task-lib/toolrunner';
+import { Writable } from "stream";
 
 export async function run() {
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);
@@ -14,13 +15,10 @@ export async function run() {
   }
   util.setTaskRootPath(path.dirname(templateFilePath));
 
-  let outputDeploymentJsonPath: string = path.resolve(tl.getPathInput("outputPath", true));
-  tl.debug(`The output deployment path is resolved as: ${outputDeploymentJsonPath}`);
-
   util.setupIotedgedev();
 
   let envList = {
-    [Constants.iotedgedevEnv.deploymentFileOutputPath]: outputDeploymentJsonPath,
+    [Constants.iotedgedevEnv.deploymentFileOutputFolder]: Constants.outputFileFolder,
   };
 
   // Pass task variable to sub process
@@ -35,13 +33,24 @@ export async function run() {
 
   tl.debug(`Following variables will be passed to the iotedgedev command: ${JSON.stringify(envList)}`);
 
+  let outputStream: EchoStream = new EchoStream();
+
   let execOptions: IExecOptions = {
     cwd: tl.cwd(),
     env: envList,
+    outStream: outputStream as stream.Writable,
   } as IExecOptions;
   let defaultPlatform = tl.getInput('defaultPlatform', true);
   let command: string = `build`;
   command += ` --file ${templateFilePath}`;
   command += ` --platform ${defaultPlatform}`;
   await tl.exec(`${Constants.iotedgedev}`, command, execOptions);
+
+  let outLog: string = outputStream.content;
+  let filterReg: RegExp = /Expanding '[^']*' to '([^']*)'/g;
+  let matches: RegExpMatchArray = filterReg.exec(outLog);
+  if(matches && matches[1]) {
+    tl.setVariable(Constants.outputVariableDeploymentPathKey, matches[1]);
+    tl.debug(`Set ${Constants.outputVariableDeploymentPathKey} to ${matches[1]}`);
+  }
 }

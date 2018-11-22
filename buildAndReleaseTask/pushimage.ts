@@ -39,9 +39,6 @@ export async function run() {
   }
   util.setTaskRootPath(path.dirname(templateFilePath));
 
-  let outputDeploymentJsonPath: string = path.resolve(tl.getPathInput("outputPath", true));
-  tl.debug(`The output deployment path is resolved as: ${outputDeploymentJsonPath}`);
-
   util.setupIotedgedev();
 
   /* 
@@ -57,7 +54,6 @@ export async function run() {
 
   let envList = {
     [Constants.iotedgedevEnv.bypassModules]: bypassModules,
-    [Constants.iotedgedevEnv.deploymentFileOutputPath]: outputDeploymentJsonPath,
     [Constants.iotedgedevEnv.registryServer]: registryAuthenticationToken.serverUrl,
     [Constants.iotedgedevEnv.registryUsername]: registryAuthenticationToken.username,
     [Constants.iotedgedevEnv.registryPassword]: registryAuthenticationToken.password,
@@ -92,32 +88,33 @@ export async function run() {
     let dockerCredentials = util.readDockerCredentials();
     tl.debug(`Number of docker cred passed: ${dockerCredentials.length}`);
 
+    let outputDeploymentJsonPath = tl.getVariable(Constants.outputVariableDeploymentPathKey);
     if (!fs.existsSync(outputDeploymentJsonPath)) {
-      throw new Error(`The generated deployment file can't be found in the path: ${outputDeploymentJsonPath}`);
-    }
-    console.log(`The generated deployment file located in the path: ${outputDeploymentJsonPath}`);
-
-    let deploymentJson = JSON.parse(fs.readFileSync(outputDeploymentJsonPath, Constants.UTF8));
-    // Expand docker credentials
-    // Will replace the registryCredentials if the server match
-    if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
-      console.log('Expanding registry credentials in deployment file...');
-      let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
-      for (let key of Object.keys(credentials)) {
-        if (credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
-          tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
-          for (let dockerCredential of dockerCredentials) {
-            if (util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
-              console.log(`Replace credential: ${dockerCredential.address}`);
-              credentials[key] = dockerCredential;
-              break;
+      tl.debug(`The generated deployment file can't be found in the path: ${outputDeploymentJsonPath}`);
+    }else {
+      console.log(`The generated deployment file located in the path: ${outputDeploymentJsonPath}`);
+      let deploymentJson = JSON.parse(fs.readFileSync(outputDeploymentJsonPath, Constants.UTF8));
+      // Expand docker credentials
+      // Will replace the registryCredentials if the server match
+      if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
+        console.log('Expanding registry credentials in deployment file...');
+        let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
+        for (let key of Object.keys(credentials)) {
+          if (credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
+            tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
+            for (let dockerCredential of dockerCredentials) {
+              if (util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
+                console.log(`Replace credential: ${dockerCredential.address}`);
+                credentials[key] = dockerCredential;
+                break;
+              }
             }
           }
         }
       }
+  
+      fs.writeFileSync(outputDeploymentJsonPath, JSON.stringify(deploymentJson, null, 2));
     }
-
-    fs.writeFileSync(outputDeploymentJsonPath, JSON.stringify(deploymentJson, null, 2));
   } catch (e) {
     tl.execSync(`docker`, `logout`, Constants.execSyncSilentOption);
     throw e;

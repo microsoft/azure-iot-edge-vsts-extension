@@ -191,15 +191,6 @@
       "defaultValue": "",
       "helpMarkDown": "Select the module(s) that you **DO NOT** need to build(or push) in the .template.json, specify module names and separate with comma.\n Example: if you have 2 modules **SampleModule1,SampleModule2** in your .template.json, you want to just build or push **SampleModule1**, then you set the bypass modules as **SampleModule2**. Leave empty if you would like to build all the modules in .template.json.",
       "groupName": "advanced_push"
-    },
-    {
-      "name": "outputPath",
-      "type": "filePath",
-      "label": "Output deployment file",
-      "defaultValue": "$(Build.ArtifactStagingDirectory)/deployment.json",
-      "visibleRule": "action = Build module images || action = Push module images",
-      "required": true,
-      "helpMarkDown": "The **path of output deployment file**, it will be used in deploy task. If it is a relative path, it will be resolved relative to **path of .template.json**."
     }
   ],
   "dataSourceBindings": [
@@ -229,5 +220,10 @@
     "CantWriteDataToFile": "Can not write data to the file %s. Error: %s",
     "NoDataWrittenOnFile": "No data was written into the file %s",
     "FileContentSynced": "Synced the file content to the disk. The content is %s."
-  }
+  },
+  "OutputVariables": [{
+    "name" : "DEPLOYMENT_FILE_PATH",
+    "description" : "This is the path of generated deployment file.",
+    "visibleRule": "action = Build module images"
+  }]
 }
