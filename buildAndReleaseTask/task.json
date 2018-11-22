@@ -28,14 +28,14 @@
       "name": "action",
       "type": "pickList",
       "label": "Action",
-      "defaultValue": "Build and Push modules",
+      "defaultValue": "Build and Push module images",
       "required": true,
       "options": {
-        "Build modules": "Build modules",
-        "Build and Push modules": "Build and Push modules",
+        "Build module images": "Build module images",
+        "Build and Push module images": "Build and Push module images",
         "Deploy to IoT Edge devices": "Deploy to IoT Edge devices"
       },
-      "helpMarkDown": "Select an Edge action.\n **Build modules** will only build modules (You can use it to check compilation error).\n **Build and Push modules** will build and push modules to container registry.\n **Deploy to IoT Edge devices** will deploy the generated deployment file to IoT Hub. (We recommend to put **Deploy** task in release pipeline)."
+      "helpMarkDown": "Select an Azure IoT Edge action.\n **Build module images** will only build modules (You can use it to check compilation error).\n **Build and Push module images** will build and push modules to container registry.\n **Deploy to IoT Edge devices** will deploy the generated deployment file to IoT Hub. (We recommend to put **Deploy** task in release pipeline)."
     },
     {
       "name": "deploymentFilePath",
@@ -70,9 +70,9 @@
       "type": "string",
       "label": "IoT Edge Deployment ID",
       "required": true,
-      "defaultValue": "vsts-deployment",
+      "defaultValue": "azure-pipelines-deployment",
       "visibleRule": "action == Deploy to IoT Edge devices",
-      "helpMarkDown": "Input the **IoT Edge Deployment ID**, if ID exists, it will be overridden.\n Check more information for [Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)"
+      "helpMarkDown": "Input the **IoT Edge Deployment ID**, if ID exists, it will be overridden.\n Check more information for [Azure IoT Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)"
     },
     {
       "name": "priority",
@@ -81,7 +81,8 @@
       "required": true,
       "defaultValue": "0",
       "visibleRule": "action == Deploy to IoT Edge devices",
-      "helpMarkDown": "Set the **priority** to a positive integer to resolve deployment conflicts: when targeted by multiple deployments a device will use the one with highest priority or (in case of two deployments with the same priority) latest creation time.\n Check more information for [Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)"
+      "helpMarkDown": "Set the **priority** to a positive integer to resolve deployment conflicts: when targeted by multiple deployments a device will use the one with highest priority or (in case of two deployments with the same priority) latest creation time.\n Check more information for [Azure IoT Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)",
+      "groupName": "advanced"
     },
     {
       "name": "deviceOption",
@@ -109,41 +110,7 @@
       "label": "IoT Edge device Target Condition",
       "required": true,
       "visibleRule": "deviceOption == Multiple Devices",
-      "helpMarkDown": "Input the **target condition** of devices you would like to deploy. Do not use double quote. Example: **tags.building=9 and tags.environment='test'**.\n Check more information for [Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)"
-    },
-    {
-      "name": "templateFilePath",
-      "type": "filePath",
-      "label": "Path of template file",
-      "defaultValue": "deployment.template.json",
-      "visibleRule": "action = Build modules || action = Build and Push modules",
-      "required": true,
-      "helpMarkDown": "The path of Edge **solution template file**. This file defines the modules and routes in Edge solution, file name ends with **.template.json**"
-    },
-    {
-      "name": "defaultPlatform",
-      "type": "pickList",
-      "label": "Default Platform",
-      "defaultValue": "amd64",
-      "required": true,
-      "visibleRule": "action = Build modules || action = Build and Push modules",
-      "options": {
-        "amd64": "amd64",
-        "windows-amd64": "windows-amd64",
-        "arm32v7": "arm32v7"
-      },
-      "properties": {
-        "EditableOptions": "True"
-      },
-      "helpMarkDown": "In your **template file**, you can leave the modules platform unspecified. For these modules, the **default platform** will be used."
-    },
-    {
-      "name": "bypassModules",
-      "type": "string",
-      "label": "Bypass Modules",
-      "defaultValue": "",
-      "visibleRule": "action = Build modules || action = Build and Push modules",
-      "helpMarkDown": "Select the modules that you **DO NOT** need to build(or push) in the template file, specify module names and separate with comma.\n Example: **SampleModule1,SampleModule2**. Leave empty if you would like to build all the modules in template file."
+      "helpMarkDown": "Input the **target condition** of devices you would like to deploy. Do not use double quote. Example: **tags.building=9 and tags.environment='test'**.\n Check more information for [Azure IoT Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)"
     },
     {
       "name": "containerregistrytype",
@@ -151,7 +118,7 @@
       "label": "Container Registry Type",
       "defaultValue": "Azure Container Registry",
       "required": true,
-      "visibleRule": "action = Build and Push modules",
+      "visibleRule": "action = Build and Push module images",
       "options": {
         "Azure Container Registry": "Azure Container Registry",
         "Generic Container Registry": "Generic Container Registry"
@@ -168,6 +135,41 @@
       "label": "Docker Registry Connection",
       "helpMarkDown": "Select a generic **Docker registry connection**. Required for **Build and Push**.",
       "visibleRule": "containerregistrytype = Generic Container Registry"
+    },
+    {
+      "name": "templateFilePath",
+      "type": "filePath",
+      "label": "Path of .template.json",
+      "defaultValue": "deployment.template.json",
+      "visibleRule": "action = Build module images || action = Build and Push module images",
+      "required": true,
+      "helpMarkDown": "The path of Azure IoT Edge **solution .template.json**. This file defines the modules and routes in Azure IoT Edge solution, file name must end with **.template.json**"
+    },
+    {
+      "name": "defaultPlatform",
+      "type": "pickList",
+      "label": "Default Platform",
+      "defaultValue": "amd64",
+      "required": true,
+      "visibleRule": "action = Build module images || action = Build and Push module images",
+      "options": {
+        "amd64": "amd64",
+        "windows-amd64": "windows-amd64",
+        "arm32v7": "arm32v7"
+      },
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "helpMarkDown": "In your **.template.json**, you can leave the modules platform unspecified. For these modules, the **default platform** will be used."
+    },
+    {
+      "name": "bypassModules",
+      "type": "string",
+      "label": "Bypass Module(s)",
+      "defaultValue": "",
+      "visibleRule": "action = Build module images || action = Build and Push module images",
+      "helpMarkDown": "Select the module(s) that you **DO NOT** need to build(or push) in the .template.json, specify module names and separate with comma.\n Example: **SampleModule1,SampleModule2**. Leave empty if you would like to build all the modules in .template.json.",
+      "groupName": "advanced"
     },
     {
       "name": "azureSubscriptionEndpoint",
@@ -190,9 +192,9 @@
       "type": "filePath",
       "label": "Path of output deployment file",
       "defaultValue": "$(Build.ArtifactStagingDirectory)/deployment.json",
-      "visibleRule": "action = Build modules || action = Build and Push modules",
+      "visibleRule": "action = Build module images || action = Build and Push module images",
       "required": true,
-      "helpMarkDown": "The **path of output deployment file**, it will be used in deploy task. If it is a relative path, it will be resolved relative to **path of template file**."
+      "helpMarkDown": "The **path of output deployment file**, it will be used in deploy task. If it is a relative path, it will be resolved relative to **path of .template.json**."
     }
   ],
   "dataSourceBindings": [
