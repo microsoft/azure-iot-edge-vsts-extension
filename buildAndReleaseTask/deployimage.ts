@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as tl from 'vsts-task-lib/task';
+import * as tl from 'azure-pipelines-task-lib/task';
 import * as os from "os";
 import util from "./util";
 import Constants from "./constant";
-import { IExecSyncOptions } from 'vsts-task-lib/toolrunner';
+import { IExecSyncOptions } from 'azure-pipelines-task-lib/toolrunner';
 import { TelemetryEvent } from './telemetry';
 
 class azureclitask {

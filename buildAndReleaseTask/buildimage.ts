@@ -1,11 +1,12 @@
 import * as path from "path";
 import * as fs from "fs";
-import * as tl from 'vsts-task-lib/task';
+import * as tl from 'azure-pipelines-task-lib/task';
 import { RegistryCredential, ACRRegistry, RegistryCredentialFactory } from './registryCredentialFactory';
 import Constants from "./constant";
 import util from "./util";
-import { IExecOptions } from 'vsts-task-lib/toolrunner';
-import { Writable } from "stream";
+import { IExecOptions } from 'azure-pipelines-task-lib/toolrunner';
+import * as stream from "stream";
+import EchoStream from './echoStream';
 
 export async function run() {
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);

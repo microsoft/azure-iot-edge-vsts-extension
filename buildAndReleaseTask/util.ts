@@ -1,7 +1,7 @@
 import Constants from "./constant";
-import * as tl from "vsts-task-lib/task";
+import * as tl from "azure-pipelines-task-lib/task";
 import * as crypto from "crypto";
-import { IExecSyncOptions } from 'vsts-task-lib/toolrunner';
+import { IExecSyncOptions } from 'azure-pipelines-task-lib/toolrunner';
 import { Writable } from "stream";
 import { RegistryCredential } from './registryCredentialFactory';
 
