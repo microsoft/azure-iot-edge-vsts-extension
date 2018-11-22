@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as tl from 'vsts-task-lib/task';
 import * as BuildImage from './buildimage';
+import * as PushImage from './pushimage';
 import * as DeployImage from './deployimage';
 import trackEvent, { TelemetryEvent } from './telemetry';
 import Constants from "./constant";
@@ -27,20 +28,20 @@ let telemetryEnabled = (tl.getVariable(Constants.variableKeyDisableTelemetry) !=
 
 async function run() {
   try {
-    if (action === 'Build modules') {
-      console.log('Building image...');
-      await BuildImage.run(false);
-      console.log('Finished building image');
-    } else if (action === 'Build and Push modules') {
-      console.log('Building and pushing image...');
+    if (action === 'Build module images') {
+      console.log('Building module images...');
+      await BuildImage.run();
+      console.log('Finished building module images');
+    } else if (action === 'Push module images') {
+      console.log('Pushing module images...');
       telemetryEvent.isACR = tl.getInput("containerregistrytype", true) === "Azure Container Registry";
-      await BuildImage.run(true);
-      console.log('Finished building and pushing image');
+      await PushImage.run();
+      console.log('Finished pushing module images');
     } else if (action === 'Deploy to IoT Edge devices') {
-      console.log('Start deploying image');
+      console.log('Start deploying');
       telemetryEvent.hashIoTHub = util.sha256(tl.getInput("iothubname", true));
       await DeployImage.run(telemetryEvent);
-      console.log('Finished Deploying image');
+      console.log('Finished Deploying');
     }
     telemetryEvent.isSuccess = true;
     tl.setResult(tl.TaskResult.Succeeded, "");
