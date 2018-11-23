@@ -77,7 +77,7 @@
       "type": "string",
       "label": "IoT Edge deployment ID",
       "required": true,
-      "defaultValue": "$(Build.Repository.Name)-devops-deployment",
+      "defaultValue": "$(System.TeamProject)-devops-deployment",
       "helpMarkDown": "Input the **IoT Edge Deployment ID**, if ID exists, it will be overridden.\n Up to 128 lowercase letters, numbers and the following characters are allowed [ -:+%_#*?!(),=@;' ].\n Check more information for [Azure IoT Edge deployment](https://docs.microsoft.com/azure/iot-edge/how-to-deploy-monitor#monitor-a-deployment)",
       "groupName": "advanced_deploy"
     },
