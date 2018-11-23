@@ -36,7 +36,7 @@ class azureclitask {
       priority = isNaN(priority) ? 0 : priority;
 
       configId = util.normalizeDeploymentId(configId);
-      console.log(`Normalized deployment id is: ${configId}`);
+      console.log(tl.loc('NomralizedDeployementId', configId));
 
       let script1 = `iot edge deployment delete --hub-name ${iothub} --config-id ${configId}`;
       let script2 = `iot edge deployment create --config-id ${configId} --hub-name ${iothub} --content ${deploymentJsonPath} --target-condition ${targetCondition} --priority ${priority}`;
@@ -183,14 +183,14 @@ class azureclitask {
 
 export async function run(telemetryEvent: TelemetryEvent) {
   let inBuildPipeline: boolean = util.checkSelfInBuildPipeline();
-  console.log(`Deployment task is running in build pipeline? ${inBuildPipeline}`);
+  console.log(tl.loc('DeployTaskRunningInBuild', inBuildPipeline));
   let deploymentFilePath: string = tl.getPathInput('deploymentFilePath', true);
 
   // Find the deployment.json file
   let findPaths: string[] = util.findFiles(deploymentFilePath);
   tl.debug(`Found ${findPaths.length} result for deployment file: ${deploymentFilePath}`);
   if (!findPaths || findPaths.length === 0) {
-    throw new Error(`Deployment file can't be found. Please ensure Path of deployment file is correctly set in the task.`);
+    throw new Error(tl.loc('DeploymentFileNotFound'));
   }
 
   for (let path of findPaths) {
@@ -199,23 +199,23 @@ export async function run(telemetryEvent: TelemetryEvent) {
 
   let deploymentJson: any = null;
   for (let path of findPaths) {
-    console.log(`Checking if the following file is a valid json: ${path}`);
+    console.log(tl.loc('CheckValidJson', path));
     try {
       deploymentJson = JSON.parse(fs.readFileSync(path, Constants.UTF8));
     } catch (e) {
-      console.log('Invalid');
+      console.log(tl.loc('Invalid'));
       continue;
     }
-    console.log('Valid');
+    console.log(tl.loc('Valid'));
     break;
   }
 
   if (deploymentJson == null) {
-    throw new Error('Cannot find a valid deployment file. Please ensure Path of deployment file is correctly set in the task.');
+    throw new Error(tl.loc('ValidDeploymentFileNotFound'));
   }
 
   if (!azureclitask.checkIfAzurePythonSdkIsInstalled()) {
-    throw new Error('Azure SDK not found');
+    throw new Error(tl.loc('AzureSdkNotFound'));
   }
   await azureclitask.runMain(deploymentJson, telemetryEvent);
 }

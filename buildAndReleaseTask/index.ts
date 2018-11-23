@@ -29,19 +29,19 @@ let telemetryEnabled = (tl.getVariable(Constants.variableKeyDisableTelemetry) !=
 async function run() {
   try {
     if (action === 'Build module images') {
-      console.log('Building module images...');
+      console.log(tl.loc('BuildingModules'));
       await BuildImage.run();
-      console.log('Finished building module images');
+      console.log(tl.loc('BuildingModulesFinished'));
     } else if (action === 'Push module images') {
-      console.log('Pushing module images...');
+      console.log(tl.loc('PushingModules'));
       telemetryEvent.isACR = tl.getInput("containerregistrytype", true) === "Azure Container Registry";
       await PushImage.run();
-      console.log('Finished pushing module images');
+      console.log(tl.loc('PushingModulesFinished'));
     } else if (action === 'Deploy to IoT Edge devices') {
-      console.log('Start deploying');
+      console.log(tl.loc('StartDeploy'));
       telemetryEvent.hashIoTHub = util.sha256(tl.getInput("iothubname", true));
       await DeployImage.run(telemetryEvent);
-      console.log('Finished Deploying');
+      console.log(tl.loc('FinishDeploy'));
     }
     telemetryEvent.isSuccess = true;
     tl.setResult(tl.TaskResult.Succeeded, "");

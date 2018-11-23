@@ -20,7 +20,7 @@ function getRegistryAuthenticationToken(): RegistryCredential {
   }
 
   if (token == null || token.username == null || token.password == null || token.serverUrl == null) {
-    throw Error(`Failed to fetch container registry authentication token, please check you container registry setting in build task. The token is ${JSON.stringify(token)}`);
+    throw Error(tl.loc('ContainerRegistryInvalid', JSON.stringify(token)));
   }
   return token;
 }
@@ -35,7 +35,7 @@ export async function run() {
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);
   tl.debug(`The template file path is ${templateFilePath}`);
   if (!fs.existsSync(templateFilePath)) {
-    throw Error(`The path of template file is not valid: ${templateFilePath}`);
+    throw Error(tl.loc('TemplateFileInvalid', templateFilePath));
   }
   util.setTaskRootPath(path.dirname(templateFilePath));
 
@@ -92,19 +92,19 @@ export async function run() {
     if (!fs.existsSync(outputDeploymentJsonPath)) {
       tl.debug(`The generated deployment file can't be found in the path: ${outputDeploymentJsonPath}`);
     }else {
-      console.log(`The generated deployment file located in the path: ${outputDeploymentJsonPath}`);
+      console.log(tl.loc('DeploymentFilePath', outputDeploymentJsonPath));
       let deploymentJson = JSON.parse(fs.readFileSync(outputDeploymentJsonPath, Constants.UTF8));
       // Expand docker credentials
       // Will replace the registryCredentials if the server match
       if (dockerCredentials != undefined && util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials != undefined) {
-        console.log('Expanding registry credentials in deployment file...');
+        console.log(tl.loc('ExpandingRegistryCredentials'));
         let credentials = util.getModulesContent(deploymentJson)['$edgeAgent']['properties.desired'].runtime.settings.registryCredentials;
         for (let key of Object.keys(credentials)) {
           if (credentials[key].username && (credentials[key].username.startsWith("$") || credentials[key].password.startsWith("$"))) {
             tl.debug(`Going to replace the cred in deployment.json with address: ${credentials[key].address}`);
             for (let dockerCredential of dockerCredentials) {
               if (util.isDockerServerMatch(credentials[key].address, dockerCredential.address)) {
-                console.log(`Replace credential: ${dockerCredential.address}`);
+                console.log(tl.loc('ReplaceCredential', dockerCredential.address));
                 credentials[key] = dockerCredential;
                 break;
               }

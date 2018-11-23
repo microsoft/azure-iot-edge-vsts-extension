@@ -69,20 +69,14 @@ export default class Util {
 
   public static findFiles(filepath: string): string[] {
     if (filepath.indexOf('*') >= 0 || filepath.indexOf('?') >= 0) {
-      tl.debug(tl.loc('ContainerPatternFound'));
       var buildFolder = tl.cwd();
       var allFiles = tl.find(buildFolder);
       var matchingResultsFiles = tl.match(allFiles, filepath, buildFolder, {
         matchBase: true
       });
 
-      if (!matchingResultsFiles || matchingResultsFiles.length == 0) {
-        console.log(`No Docker file matching ${filepath} was found.`);
-      }
-
       return matchingResultsFiles;
     } else {
-      tl.debug(tl.loc('ContainerPatternNotFound'));
       return [filepath];
     }
   }
@@ -101,7 +95,7 @@ export default class Util {
     try {
       let result = tl.execSync(`${Constants.iotedgedev}`, `--version`, Constants.execSyncSilentOption);
       if (result.code === 0) {
-        console.log(`${Constants.iotedgedev} already installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
+        console.log(tl.loc('DependencyAlreadyInstalled', Constants.iotedgedev, result.stdout.substring(result.stdout.indexOf("version"))));
         return;
       }
     } catch (e) {
@@ -140,9 +134,9 @@ export default class Util {
 
     let result = tl.execSync(`${Constants.iotedgedev}`, `--version`, Constants.execSyncSilentOption);
     if (result.code === 0) {
-      console.log(`${Constants.iotedgedev} installed with ${result.stdout.substring(result.stdout.indexOf("version"))}`);
+      console.log(tl.loc('DependencyInstallSuccess', Constants.iotedgedev, result.stdout.substring(result.stdout.indexOf("version"))));
     } else {
-      throw Error(`${Constants.iotedgedev} installation failed, see detailed error in debug mode`);
+      throw Error(tl.loc('DependencyInstallFail', Constants.iotedgedev));
     }
   }
 
@@ -158,7 +152,7 @@ export default class Util {
         let result = tl.execSync(cmd[0], cmd[1], Constants.execSyncSilentOption);
         tl.debug(`OS is ${result.stdout}`);
       } catch (e) {
-        console.log(`Error happened when fetching os info: ${e.message}`);
+        tl.debug(`Error happened when fetching os info: ${e.message}`);
       }
     }
   }

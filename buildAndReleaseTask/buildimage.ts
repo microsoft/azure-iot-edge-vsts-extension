@@ -12,7 +12,7 @@ export async function run() {
   let templateFilePath: string = tl.getPathInput("templateFilePath", true);
   tl.debug(`The template file path is ${templateFilePath}`);
   if (!fs.existsSync(templateFilePath)) {
-    throw Error(`The path of template file is not valid: ${templateFilePath}`);
+    throw Error(tl.loc('TemplateFileInvalid', templateFilePath));
   }
   util.setTaskRootPath(path.dirname(templateFilePath));
 
