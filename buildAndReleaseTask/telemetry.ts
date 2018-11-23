@@ -1,7 +1,7 @@
 import * as appInsights from 'applicationinsights';
 const metadata = {
   id: 'iot-edge-build-deploy',
-  version: '1.1.2',
+  version: '2.0.0',
   publisher: 'vsc-iot',
 }
 
