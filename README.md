@@ -1,5 +1,13 @@
-# Azure IoT Edge For VSTS
-IoT Edge Build and Deploy is a tool for continuous integration(build and push docker image) and continuous deployment(create Edge deployment on Azure) for Azure IoT Edge modules project.
+# Azure IoT Edge For Azure Pipelines
+
+[Deprecated] IoT Edge Build and Deploy is a tool for continuous integration(build and push docker image) and continuous deployment(create Edge deployment on Azure) for Azure IoT Edge modules project.
+
+# **Reminder**
+`Azure IoT Edge` task is moved to [Azure Pipelines in-house tasks](https://github.com/Microsoft/azure-pipelines-tasks/tree/master/Tasks/AzureIoTEdgeV2). In-house task means you will have the task pre-installed in any Azure DevOps account, you don't need to install the extension from marketplace to use the `Azure IoT Edge` task.
+
+Since it is already an in-house task, when you install the extension, it will remind you that there's already an existing task with same id. So you don't need to and is not able to install it. 
+
+Now the in-house task is version 2.0(preview), you can refer to the [documentation](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd) for the usage guide. This extension will be retired once 2.0 becomes the stable version. You can give feedback on the [documentation](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-ci-cd) regarding issues, feature requests and suggestions, or you can ask question on stackoverflow with `azure-iot-edge` tag.
 
 ## Requirement
 * For amd64 platform, please use hosted agent `Hosted Ubuntu 1604` or `Hosted Linux Preview`. For windows-amd64 platform, please use hosted agent `Hosted VS2017`
